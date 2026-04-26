@@ -1,0 +1,839 @@
+[
+  {
+    "objectID": "python-api.html",
+    "href": "python-api.html",
+    "title": "Python API",
+    "section": "",
+    "text": "quarto-coursegen exposes a clean Python API for programmatic use. The main entry point is generate(), which accepts a CoursegenConfig object.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#quick-example",
+    "href": "python-api.html#quick-example",
+    "title": "Python API",
+    "section": "Quick example",
+    "text": "Quick example\nfrom pathlib import Path\nfrom quarto_coursegen import generate, resolve_config\n\ncfg = resolve_config(\n    course_yaml=Path(\"course.yaml\"),\n    output_root=Path(\".\"),\n    force=False,\n    dry_run=False,\n)\ngenerate(cfg)\nresolve_config handles the full precedence chain — CLI arguments &gt; coursegen.yaml &gt; built-in defaults — and returns a populated CoursegenConfig.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#coursegenconfig",
+    "href": "python-api.html#coursegenconfig",
+    "title": "Python API",
+    "section": "CoursegenConfig",
+    "text": "CoursegenConfig\nfrom quarto_coursegen.config import CoursegenConfig, BUILTIN_TEMPLATES_DIR, BUILTIN_LANG_DIR\nfrom pathlib import Path\n\ncfg = CoursegenConfig(\n    course_yaml=Path(\"course.yaml\"),\n    output_root=Path(\".\"),\n    templates_dirs=[Path(\"templates/\"), BUILTIN_TEMPLATES_DIR],  # local overlay first\n    lang_dirs=[BUILTIN_LANG_DIR],\n    force=False,\n    dry_run=False,\n)\n\nFields\n\n\n\n\n\n\n\n\nField\nType\nDescription\n\n\n\n\ncourse_yaml\nPath\nPath to course.yaml\n\n\noutput_root\nPath\nRoot directory for all generated output\n\n\ntemplates_dirs\nlist[Path]\nTemplate search path — first match wins\n\n\nlang_dirs\nlist[Path]\nLang file search path — first match wins\n\n\nforce\nbool\nOverwrite existing content stubs\n\n\ndry_run\nbool\nPrint planned actions without writing any files\n\n\n\nThe property cfg.content_dir returns output_root / \"content\".",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#resolve_config",
+    "href": "python-api.html#resolve_config",
+    "title": "Python API",
+    "section": "resolve_config",
+    "text": "resolve_config\nfrom quarto_coursegen.config import resolve_config\n\ncfg = resolve_config(\n    course_yaml=None,        # Path | None → auto-discovers course.yaml\n    config_file=None,        # Path | None → auto-discovers coursegen.yaml\n    output_root=None,        # Path | None → cwd\n    templates_dirs=None,     # list[Path] | None\n    lang_dirs=None,          # list[Path] | None\n    force=False,\n    dry_run=False,\n)\nAll arguments are optional. None triggers auto-discovery or built-in defaults.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#generate",
+    "href": "python-api.html#generate",
+    "title": "Python API",
+    "section": "generate",
+    "text": "generate\nfrom quarto_coursegen.generators import generate\n\ngenerate(cfg)   # cfg: CoursegenConfig\nRuns the full generation pipeline:\n\nLoad and normalise course.yaml\nResolve i18n strings\nGenerate module pages\nGenerate artifact stubs\nGenerate course-level artifacts (syllabus, etc.)\nGenerate index.qmd and _quarto.yml (skip if exists)\nGenerate _quarto-nav.yml (always overwrite)\nGenerate sub-project _quarto.yml files (always overwrite)",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#low-level-functions",
+    "href": "python-api.html#low-level-functions",
+    "title": "Python API",
+    "section": "Low-level functions",
+    "text": "Low-level functions\nFor custom pipelines you can call individual generator functions directly:\nfrom quarto_coursegen.generators import (\n    generate_module_page,\n    generate_artifact_stubs,\n    generate_nav_config,\n    generate_subproject_configs,\n)\nfrom quarto_coursegen.config import load_course, load_i18n\nfrom quarto_coursegen.env import make_jinja_env\n\ncourse = load_course(Path(\"course.yaml\"))\nenv = make_jinja_env([Path(\"templates/\"), BUILTIN_TEMPLATES_DIR])\ni18n = load_i18n(course[\"course\"], [BUILTIN_LANG_DIR])",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "python-api.html#package-constants",
+    "href": "python-api.html#package-constants",
+    "title": "Python API",
+    "section": "Package constants",
+    "text": "Package constants\nfrom quarto_coursegen.config import BUILTIN_TEMPLATES_DIR, BUILTIN_LANG_DIR\n\n\n\n\n\n\n\nConstant\nDescription\n\n\n\n\nBUILTIN_TEMPLATES_DIR\nPath to the built-in templates/ directory inside the package\n\n\nBUILTIN_LANG_DIR\nPath to the built-in lang/ directory inside the package\n\n\n\nBoth are resolved via importlib.resources and are safe across all packaging formats (wheel, editable install, zipapp).",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Python API"
+    ]
+  },
+  {
+    "objectID": "i18n.html",
+    "href": "i18n.html",
+    "title": "Internationalisation",
+    "section": "",
+    "text": "quarto-coursegen supports i18n strings in generated .qmd stubs (labels, section headings, navigation text, etc.). The active language is set once in course.yaml.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "i18n.html#setting-the-language",
+    "href": "i18n.html#setting-the-language",
+    "title": "Internationalisation",
+    "section": "Setting the language",
+    "text": "Setting the language\ncourse:\n  language: \"de\"    # default: \"en\"\nBuilt-in languages: en (English) and de (German).",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "i18n.html#resolution-order",
+    "href": "i18n.html#resolution-order",
+    "title": "Internationalisation",
+    "section": "Resolution order",
+    "text": "Resolution order\nLanguage strings are resolved from highest to lowest priority:\n\nInline i18n: overrides in course.yaml\nFirst matching {lang}.yaml found across lang directories (local overlay first, built-in fallback)\nBuilt-in English defaults — always the base",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "i18n.html#adding-a-new-language",
+    "href": "i18n.html#adding-a-new-language",
+    "title": "Internationalisation",
+    "section": "Adding a new language",
+    "text": "Adding a new language\nquarto-coursegen init copies lang/en.yaml and lang/de.yaml into your course project. To add a new language, create lang/{code}.yaml following the same structure:\n# lang/fr.yaml\nnav:\n  home: \"Accueil\"\n  modules: \"Modules\"\n  …\nPartial files are fine — only the keys present override the English defaults. Omitted keys fall back to English automatically.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "i18n.html#inline-overrides",
+    "href": "i18n.html#inline-overrides",
+    "title": "Internationalisation",
+    "section": "Inline overrides",
+    "text": "Inline overrides\nOverride individual strings directly in course.yaml without creating a separate lang file:\ncourse:\n  language: de\n  i18n:\n    nav:\n      home: Startseite    # overrides the German lang file value\nInline overrides have the highest priority — they override both the lang file and the built-in defaults.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "i18n.html#custom-lang-directory",
+    "href": "i18n.html#custom-lang-directory",
+    "title": "Internationalisation",
+    "section": "Custom lang directory",
+    "text": "Custom lang directory\nPass a custom directory at the command line:\nquarto-coursegen generate --lang-dir /path/to/my/lang\nOr configure it in coursegen.yaml:\nlang: lang/\nWhen multiple lang directories are configured, the first directory that contains a matching {lang}.yaml wins. The built-in lang files act as the final fallback.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Internationalisation"
+    ]
+  },
+  {
+    "objectID": "configuration.html",
+    "href": "configuration.html",
+    "title": "Configuration File",
+    "section": "",
+    "text": "Instead of passing CLI flags every time, you can place a coursegen.yaml in the root of your course repository. The generate command discovers it automatically.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "configuration.html#auto-discovery",
+    "href": "configuration.html#auto-discovery",
+    "title": "Configuration File",
+    "section": "Auto-discovery",
+    "text": "Auto-discovery\nThe command searches for a config file in the current directory in this order:\n\ncoursegen.yaml\n.coursegen.yaml\ncoursegen.yml\n.coursegen.yml\n\nYou can also point to a config file explicitly:\nquarto-coursegen generate --config /path/to/coursegen.yaml",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "configuration.html#supported-keys",
+    "href": "configuration.html#supported-keys",
+    "title": "Configuration File",
+    "section": "Supported keys",
+    "text": "Supported keys\n# coursegen.yaml\n\ncourse: course.yaml       # path to course.yaml, relative to this file\noutput_root: .            # where content/, index.qmd, _quarto*.yml go\ntemplates: templates/     # local Jinja2 templates overlay (optional)\nlang: lang/               # local i18n lang directory overlay (optional)\n\n\n\n\n\n\n\n\nKey\nDefault\nDescription\n\n\n\n\ncourse\ncourse.yaml\nPath to course.yaml\n\n\noutput_root\n. (current directory)\nRoot directory for all generated output\n\n\ntemplates\n—\nLocal templates directory; searched before built-in templates\n\n\nlang\n—\nLocal lang directory; searched before built-in lang files",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "configuration.html#precedence",
+    "href": "configuration.html#precedence",
+    "title": "Configuration File",
+    "section": "Precedence",
+    "text": "Precedence\nCLI arguments  &gt;  coursegen.yaml  &gt;  built-in defaults\nCLI flags always take precedence over anything in coursegen.yaml.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "configuration.html#example-multi-root-layout",
+    "href": "configuration.html#example-multi-root-layout",
+    "title": "Configuration File",
+    "section": "Example: multi-root layout",
+    "text": "Example: multi-root layout\nIf your course.yaml lives in a subdirectory, point coursegen.yaml at it:\n# coursegen.yaml\ncourse: config/course.yaml\noutput_root: .\ntemplates: templates/\nlang: lang/",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "configuration.html#example-custom-output-root",
+    "href": "configuration.html#example-custom-output-root",
+    "title": "Configuration File",
+    "section": "Example: custom output root",
+    "text": "Example: custom output root\nTo generate all output into a build/ subdirectory:\n# coursegen.yaml\ncourse: course.yaml\noutput_root: build/",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Configuration file"
+    ]
+  },
+  {
+    "objectID": "commands/init.html",
+    "href": "commands/init.html",
+    "title": "init",
+    "section": "",
+    "text": "Usage: quarto-coursegen init [OPTIONS] [COURSE_DIR]\nBootstrap a new Quarto course project directory.\nCopies the bundled skeleton files, Jinja2 templates, and language files into the target directory, creating it if necessary. Nothing is overwritten unless --force is given.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "commands/init.html#what-gets-created",
+    "href": "commands/init.html#what-gets-created",
+    "title": "init",
+    "section": "What gets created",
+    "text": "What gets created\n\n\n\n\n\n\n\nPath\nDescription\n\n\n\n\ncourse.yaml\nStarter course definition — edit this first\n\n\nMakefile\nRendering targets (make website, make slides, …)\n\n\nstyles/custom.scss\nWebsite HTML theme stub\n\n\nstyles/slides.scss\nreveal.js theme stub\n\n\n.gitignore\nIgnores docs/, Quarto caches, .venv/\n\n\ntemplates/*.j2\nAll built-in Jinja2 templates — ready for local customisation\n\n\nlang/*.yaml\nBuilt-in language files (en.yaml, de.yaml) — add or override strings\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe Makefile contains only rendering targets (make website, make slides, make handouts, make assignments, make all, make clean). There is no make generate target — generation is handled by the quarto-coursegen generate CLI command.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "commands/init.html#usage",
+    "href": "commands/init.html#usage",
+    "title": "init",
+    "section": "Usage",
+    "text": "Usage\n# Initialise the current directory\nquarto-coursegen init\n\n# Create and initialise a named directory\nquarto-coursegen init my-course\n\n# Preview what would be created without writing anything\nquarto-coursegen init my-course --dry-run\n\n# Overwrite files that already exist\nquarto-coursegen init my-course --force",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "commands/init.html#options",
+    "href": "commands/init.html#options",
+    "title": "init",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument / Option\nShort\nDescription\n\n\n\n\nCOURSE_DIR\n\nDirectory to initialise (default: current directory)\n\n\n--force\n-f\nOverwrite existing files\n\n\n--dry-run\n\nPrint planned actions without writing any files",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "commands/init.html#typical-workflow-after-init",
+    "href": "commands/init.html#typical-workflow-after-init",
+    "title": "init",
+    "section": "Typical workflow after init",
+    "text": "Typical workflow after init\nquarto-coursegen init my-course\ncd my-course\n\n# Install the fontawesome Quarto extension (used by built-in templates)\nquarto add quarto-ext/fontawesome\n\n# Edit course.yaml\n$EDITOR course.yaml\n\n# Scaffold .qmd stubs\nquarto-coursegen generate\n\n# Render\nmake website",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "commands/init.html#local-template-customisation",
+    "href": "commands/init.html#local-template-customisation",
+    "title": "init",
+    "section": "Local template customisation",
+    "text": "Local template customisation\nBecause init copies the built-in templates into templates/ in your project, you can customise them freely without modifying the package. The generate command automatically searches templates/ in your project before falling back to the built-in package templates.\nSee Templates & Filters for details.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "init"
+    ]
+  },
+  {
+    "objectID": "course-yaml.html",
+    "href": "course-yaml.html",
+    "title": "course.yaml Reference",
+    "section": "",
+    "text": "course.yaml is the single source of truth for the entire course. The generator reads nothing else to determine what files to create.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "course.yaml"
+    ]
+  },
+  {
+    "objectID": "course-yaml.html#top-level-structure",
+    "href": "course-yaml.html#top-level-structure",
+    "title": "course.yaml Reference",
+    "section": "Top-level structure",
+    "text": "Top-level structure\ncourse:      # course-wide metadata\n  ...\n\nartifacts:   # course-level artifacts (e.g. syllabus, overview deck)\n  - ...\n\nmodules:     # ordered list of modules\n  - ...",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "course.yaml"
+    ]
+  },
+  {
+    "objectID": "course-yaml.html#course-block",
+    "href": "course-yaml.html#course-block",
+    "title": "course.yaml Reference",
+    "section": "course block",
+    "text": "course block\ncourse:\n  id: my-course                  # used in file paths and URLs\n  title: \"Logic 101\"\n  subtitle: \"Introduction to Formal Logic\"\n  semester: \"WS 2026\"\n  language: \"en\"                 # drives i18n strings; built-ins: en, de\n  ects: 3\n  instructors:\n    - name: \"Prof. Jane Smith\"\n      email: \"smith@example.com\"\n      role: \"lecturer\"           # lecturer | tutor | coordinator\n  organization:\n    institution: \"Example University\"\n    department: \"Department of Philosophy\"\n  defaults:                      # applied to every module unless overridden\n    status: planned\n    visibility: public\n    duration: 90                 # minutes\n  schedule:\n    start_date: 2026-10-01\n    end_date:   2027-01-31\n    weekly_day: \"Monday\"\n  i18n:                          # optional inline i18n overrides (see Internationalisation)\n    nav:\n      home: Startseite\n\nInstructors\nInstructors are defined at course level and can be overridden per module. If a module omits its own instructors: list, the course-level list is inherited automatically by the generator.\nEach entry supports:\n\n\n\nField\nDescription\n\n\n\n\nname\nFull name (required)\n\n\nemail\nEmail address (optional)\n\n\nrole\nlecturer, tutor, or coordinator\n\n\n\n\n\ndefaults block\nAny field in defaults is merged into every module entry that does not set that field explicitly. Common uses: status, visibility, duration.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "course.yaml"
+    ]
+  },
+  {
+    "objectID": "course-yaml.html#module-entries",
+    "href": "course-yaml.html#module-entries",
+    "title": "course.yaml Reference",
+    "section": "Module entries",
+    "text": "Module entries\nmodules:\n  - id: intro                     # unique; used in file names and URLs\n    type: lecture                 # lecture | exercise | lab | seminar | …\n    title: \"Introduction\"\n    subtitle: \"Why logic?\"        # optional\n    description: |               # optional free-text\n      Overview of the course …\n    date: 2026-10-01\n    duration: 90                  # minutes; overrides defaults.duration\n    status: planned               # planned | draft | ready | published\n    visibility: public            # public | hidden\n    instructors:                  # overrides course-level instructors\n      - name: \"Dr. Jones\"\n        role: tutor\n    tags: [logic, intro]\n    learning_objectives: |\n      - Understand the scope of formal logic\n      - Distinguish syntax from semantics\n    lms:\n      release: 2026-09-28\n      due: 2026-10-08\n    dependencies: []\n    artifacts:\n      - id: intro-slides\n        type: slides\n        enabled: true\n        output_formats: [revealjs, beamer]\n      - id: intro-handout\n        type: handout\n        enabled: true\n        output_formats: [website, pdf]\n\nModule fields\n\n\n\nField\nDefault\nDescription\n\n\n\n\nid\n—\nRequired. Unique identifier; used in file names and URLs\n\n\ntype\n—\nModule type (metadata only; lecture, exercise, …)\n\n\ntitle\n—\nDisplay title\n\n\nsubtitle\n—\nOptional subtitle\n\n\ndescription\n—\nOptional free-text description\n\n\ndate\n—\nISO date of the session\n\n\nduration\ndefaults.duration\nDuration in minutes\n\n\nstatus\ndefaults.status\nplanned, draft, ready, published\n\n\nvisibility\ndefaults.visibility\npublic or hidden\n\n\ninstructors\ncourse-level list\nList of instructor entries\n\n\ntags\n—\nList of tags (metadata only)\n\n\nlearning_objectives\n—\nMultiline string or list\n\n\nlms\n—\nLMS release/due dates (metadata only)\n\n\ndependencies\n[]\nList of other module IDs this module depends on\n\n\nartifacts\n—\nList of artifact entries — see Artifacts",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "course.yaml"
+    ]
+  },
+  {
+    "objectID": "course-yaml.html#course-level-artifacts",
+    "href": "course-yaml.html#course-level-artifacts",
+    "title": "course.yaml Reference",
+    "section": "Course-level artifacts",
+    "text": "Course-level artifacts\nArtifacts can also be declared at the top level for course-wide documents such as a syllabus or a course overview slide deck:\nartifacts:\n  - id: syllabus\n    type: syllabus\n    enabled: true\n    file: \"content/syllabus.qmd\"\nThese follow the same schema as module-level artifacts. See Artifacts for all artifact fields and options.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "course.yaml"
+    ]
+  },
+  {
+    "objectID": "installation.html",
+    "href": "installation.html",
+    "title": "Installation",
+    "section": "",
+    "text": "Python ≥ 3.11 is required.\n\n\n\nInstall Quarto for your platform. quarto-coursegen generate only writes plain .qmd files and does not invoke Quarto, but you will need it for the rendering stage.\n\n\n\nThe built-in .qmd.j2 templates reference the fontawesome extension. Install it once per course project after running quarto-coursegen init:\nquarto add quarto-ext/fontawesome",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Installation"
+    ]
+  },
+  {
+    "objectID": "installation.html#prerequisites",
+    "href": "installation.html#prerequisites",
+    "title": "Installation",
+    "section": "",
+    "text": "Python ≥ 3.11 is required.\n\n\n\nInstall Quarto for your platform. quarto-coursegen generate only writes plain .qmd files and does not invoke Quarto, but you will need it for the rendering stage.\n\n\n\nThe built-in .qmd.j2 templates reference the fontawesome extension. Install it once per course project after running quarto-coursegen init:\nquarto add quarto-ext/fontawesome",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Installation"
+    ]
+  },
+  {
+    "objectID": "installation.html#installing-quarto-coursegen",
+    "href": "installation.html#installing-quarto-coursegen",
+    "title": "Installation",
+    "section": "Installing quarto-coursegen",
+    "text": "Installing quarto-coursegen\n\nVia pip\npip install quarto-coursegen\n\n\nVia uv (recommended)\nuv installs quarto-coursegen as an isolated CLI tool, available globally without activating a virtual environment:\nuv tool install quarto-coursegen\nTo update later:\nuv tool upgrade quarto-coursegen\n\n\nVerify the installation\nquarto-coursegen --version",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Installation"
+    ]
+  },
+  {
+    "objectID": "installation.html#python-virtual-environments",
+    "href": "installation.html#python-virtual-environments",
+    "title": "Installation",
+    "section": "Python virtual environments",
+    "text": "Python virtual environments\nIf you prefer a project-local install, create a virtual environment first:\npython -m venv .venv\nsource .venv/bin/activate   # Windows: .venv\\Scripts\\activate\npip install quarto-coursegen",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Installation"
+    ]
+  },
+  {
+    "objectID": "installation.html#upgrading",
+    "href": "installation.html#upgrading",
+    "title": "Installation",
+    "section": "Upgrading",
+    "text": "Upgrading\npip install --upgrade quarto-coursegen\n# or\nuv tool upgrade quarto-coursegen",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Installation"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "quarto-coursegen",
+    "section": "",
+    "text": "quarto-coursegen is a CLI tool that turns a single course.yaml definition into a complete set of Quarto teaching materials — structured .qmd skeleton files, sub-project configs, and a course website.\nIt owns the generation stage of a two-stage authoring workflow:",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#quick-start",
+    "href": "index.html#quick-start",
+    "title": "quarto-coursegen",
+    "section": "Quick start",
+    "text": "Quick start\n# Install\npip install quarto-coursegen          # or: uv tool install quarto-coursegen\n\n# Bootstrap a new course project\nquarto-coursegen init my-course\ncd my-course\n\n# Edit course.yaml — title, modules, artifacts, instructors …\n\n# Scaffold .qmd stubs from course.yaml\nquarto-coursegen generate\n\n# Fill in content in the generated .qmd files, then render\nquarto render          # course website → docs/\nmake slides            # reveal.js + Beamer PDF → docs/slides/\nmake handouts          # PDF handouts → docs/handouts/",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-quarto-coursegen-does-not-do",
+    "href": "index.html#what-quarto-coursegen-does-not-do",
+    "title": "quarto-coursegen",
+    "section": "What quarto-coursegen does not do",
+    "text": "What quarto-coursegen does not do\n\nIt does not invoke Quarto. generate only writes plain text files.\nIt does not manage Quarto extensions or themes.\nIt does not deploy or publish the rendered output.",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#next-steps",
+    "href": "index.html#next-steps",
+    "title": "quarto-coursegen",
+    "section": "Next steps",
+    "text": "Next steps\n\nInstallation — requirements and install options\nTwo-stage workflow — understanding the architecture\ncourse.yaml reference — the single source of truth\ninit command — bootstrap a new course project\ngenerate command — generate stubs from course.yaml",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "workflow.html",
+    "href": "workflow.html",
+    "title": "Two-Stage Workflow",
+    "section": "",
+    "text": "Never mix generation and rendering.\n\nGeneration = structural, infrequent, potentially destructive\nRendering = repeatable, safe, frequent\n\n\nquarto-coursegen owns only Stage 1. Stage 2 is handled entirely by Quarto.",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Two-Stage Workflow"
+    ]
+  },
+  {
+    "objectID": "workflow.html#the-core-principle",
+    "href": "workflow.html#the-core-principle",
+    "title": "Two-Stage Workflow",
+    "section": "",
+    "text": "Never mix generation and rendering.\n\nGeneration = structural, infrequent, potentially destructive\nRendering = repeatable, safe, frequent\n\n\nquarto-coursegen owns only Stage 1. Stage 2 is handled entirely by Quarto.",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Two-Stage Workflow"
+    ]
+  },
+  {
+    "objectID": "workflow.html#stage-1-generation",
+    "href": "workflow.html#stage-1-generation",
+    "title": "Two-Stage Workflow",
+    "section": "Stage 1 — Generation",
+    "text": "Stage 1 — Generation\nInput: course.yaml Tool: quarto-coursegen generate Output: .qmd skeleton files + Quarto config files under content/\nThe generator reads your course definition and produces a set of structured .qmd stubs that you fill in with actual teaching content. Files that already exist are never overwritten (unless you pass --force), so running the generator repeatedly is safe.\nConfig files that the generator fully owns are always regenerated from course.yaml so they stay in sync even as modules and artifacts change.\n\nWhat gets generated\n\n\n\n\n\n\n\n\nOutput file\nTemplate\nOverwrite policy\n\n\n\n\nindex.qmd\nindex.qmd.j2\nNever — hand-editable after first run\n\n\n_quarto.yml\n_quarto.yml.j2\nNever — hand-editable after first run\n\n\n_quarto-nav.yml\n_quarto-nav.yml.j2\nAlways — generator-owned\n\n\ncontent/modules/{id}.qmd\nmodule.qmd.j2\nNever\n\n\ncontent/slides/{id}-slides.qmd\nslides.qmd.j2\nNever\n\n\ncontent/handouts/{id}-handout.qmd\nhandout.qmd.j2\nNever\n\n\ncontent/notes/{id}-notes.qmd\nnotes.qmd.j2\nNever\n\n\ncontent/assignments/{id}-assignment.qmd\nassignment.qmd.j2\nNever\n\n\ncontent/syllabus.qmd\nsyllabus.qmd.j2\nNever\n\n\ncontent/slides/_quarto.yml\nslides-project.yml.j2\nAlways — generator-owned\n\n\ncontent/handouts/_quarto.yml\nhandouts-project.yml.j2\nAlways — generator-owned\n\n\ncontent/assignments/_quarto.yml\nassignments-project.yml.j2\nAlways — generator-owned\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nFile naming convention: when no explicit file: path is set in course.yaml, the generator uses content/{subdir}/{module-id}-{artifact-type}.qmd as the default path.",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Two-Stage Workflow"
+    ]
+  },
+  {
+    "objectID": "workflow.html#stage-2-rendering",
+    "href": "workflow.html#stage-2-rendering",
+    "title": "Two-Stage Workflow",
+    "section": "Stage 2 — Rendering",
+    "text": "Stage 2 — Rendering\nInput: completed .qmd files Tool: quarto render or make &lt;target&gt; Output: HTML, PDF, reveal.js slides, Beamer slides\nEach output type is an independent Quarto sub-project rooted in a subdirectory of content/. Quarto profiles are intentionally not used because profiles merge onto the base _quarto.yml (a website project), causing project-type and format bleed that breaks slides and PDF rendering. Independent sub-projects avoid this entirely.\n\n\n\n\n\n\n\n\nMakefile target\nCommand\nOutput\n\n\n\n\nmake website\nquarto render\ndocs/ — HTML website\n\n\nmake slides\nquarto render content/slides/\ndocs/slides/ — reveal.js + Beamer\n\n\nmake handouts\nquarto render content/handouts/\ndocs/handouts/ — PDF\n\n\nmake assignments\nquarto render content/assignments/\ndocs/assignments/ — HTML + PDF\n\n\nmake all\nall of the above\neverything\n\n\nmake clean\nremoves docs/ render cache\n—\n\n\n\nSee Rendering for details on sub-project configuration, format options, and switching from Beamer to decktape for slide PDFs.",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Two-Stage Workflow"
+    ]
+  },
+  {
+    "objectID": "workflow.html#typical-authoring-loop",
+    "href": "workflow.html#typical-authoring-loop",
+    "title": "Two-Stage Workflow",
+    "section": "Typical authoring loop",
+    "text": "Typical authoring loop\n\nUpdate course.yaml — add a module, change a date, enable an artifact.\nRun quarto-coursegen generate — new stubs are created; existing ones are untouched.\nEdit the new .qmd stubs to add actual content.\nRun make website (or make all) to preview the rendered output.\nRepeat.\n\nFor big structural changes (renaming modules, changing artifact types), use quarto-coursegen generate --force to regenerate stubs with updated front matter.\n\n\n\n\n\n\nWarning\n\n\n\n--force overwrites manual edits in stub files. Review the diff carefully before committing.",
+    "crumbs": [
+      "Home",
+      "Getting Started",
+      "Two-Stage Workflow"
+    ]
+  },
+  {
+    "objectID": "artifacts.html",
+    "href": "artifacts.html",
+    "title": "Artifacts",
+    "section": "",
+    "text": "An artifact is a single deliverable produced for a module (or for the whole course): a slide deck, a handout, an assignment, notes, a syllabus, etc.\nArtifacts are declared in course.yaml under a module’s artifacts: list or at the top-level artifacts: list for course-wide documents.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "artifacts.html#artifact-fields",
+    "href": "artifacts.html#artifact-fields",
+    "title": "Artifacts",
+    "section": "Artifact fields",
+    "text": "Artifact fields\n\n\n\n\n\n\n\n\nField\nDefault\nDescription\n\n\n\n\nid\n{type}-{index}\nUnique identifier within the scope (module or course)\n\n\ntype\n—\nDrives template resolution and subdirectory placement\n\n\nenabled\ntrue\nWhether to generate a stub and include in Quarto configs\n\n\nstatus\nplanned\nLifecycle status — metadata only\n\n\nfile\ncomputed\nExplicit output path; overrides the computed default\n\n\noutput_formats\n—\nList of render formats: revealjs, beamer, pdf, website\n\n\nstub_template\nauto-resolved\nJinja2 template name: string or per-format dict",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "artifacts.html#default-file-paths",
+    "href": "artifacts.html#default-file-paths",
+    "title": "Artifacts",
+    "section": "Default file paths",
+    "text": "Default file paths\nWhen file: is not set, the generator computes:\ncontent/{subdir}/{scope_id}-{artifact_type}.qmd\nwhere {subdir} is determined by artifact type:\n\n\n\nArtifact type\nSubdirectory\n\n\n\n\nslides\ncontent/slides/\n\n\nhandout\ncontent/handouts/\n\n\nnotes\ncontent/notes/\n\n\nassignment\ncontent/assignments/\n\n\nsyllabus\ncontent/\n\n\nany other\ncontent/{type}/\n\n\n\nExample: module id: intro with artifact type: slides produces content/slides/intro-slides.qmd.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "artifacts.html#output-formats",
+    "href": "artifacts.html#output-formats",
+    "title": "Artifacts",
+    "section": "Output formats",
+    "text": "Output formats\nEach artifact declares which Quarto render formats it participates in via the output_formats list. The generator uses this to include the artifact in the correct sub-project _quarto.yml and to emit matching format blocks in the stub front matter.\n\n\n\n\n\n\n\n\nFormat\nSub-project\nOutput\n\n\n\n\nrevealjs\ncontent/slides/\nreveal.js HTML slides\n\n\nbeamer\ncontent/slides/\nBeamer PDF slides\n\n\npdf\ncontent/handouts/ or content/assignments/\nPDF document\n\n\nwebsite\nroot website project\nHTML page embedded in course website",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "artifacts.html#the-other-formats-sidebar-link",
+    "href": "artifacts.html#the-other-formats-sidebar-link",
+    "title": "Artifacts",
+    "section": "The “Other Formats” sidebar link",
+    "text": "The “Other Formats” sidebar link\nWhen a Quarto document declares multiple formats in its YAML front matter, Quarto automatically renders an “Other Formats” entry in the right-hand sidebar, linking to the alternative output (e.g. a PDF download link on an HTML page).\nWhether this link appears is controlled entirely by the stub template, not by the renderer. The built-in templates conditionally emit a second format block based on output_formats:\n\n\n\n\n\n\n\n\nTemplate\nCondition\nEmitted formats in stub\n\n\n\n\nhandout.qmd.j2\nwebsite in output_formats\nhtml: default + pdf: …\n\n\nhandout.qmd.j2\nwebsite not in output_formats\npdf: … only\n\n\nnotes.qmd.j2\npdf in output_formats\nhtml: default + pdf: …\n\n\nnotes.qmd.j2\npdf not in output_formats\nhtml: default only\n\n\nassignment.qmd.j2\nalways\nhtml: default + pdf: …\n\n\n\nTo enable the “Other Formats: PDF” link for a handout, declare both formats:\nartifacts:\n  - id: intro-handout\n    type: handout\n    output_formats: [website, pdf]   # both → \"Other Formats: PDF\" appears\nCustom stub templates follow the same rule: declare both formats in the generated front matter and Quarto produces the sidebar link automatically.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "artifacts.html#examples",
+    "href": "artifacts.html#examples",
+    "title": "Artifacts",
+    "section": "Examples",
+    "text": "Examples\n\nSlides with Beamer PDF\nartifacts:\n  - id: intro-slides\n    type: slides\n    enabled: true\n    output_formats: [revealjs, beamer]\n\n\nHandout with website page and PDF download\nartifacts:\n  - id: intro-handout\n    type: handout\n    enabled: true\n    output_formats: [website, pdf]\n\n\nAssignment (website + PDF)\nartifacts:\n  - id: ex01\n    type: assignment\n    enabled: true\n    output_formats: [website, pdf]\n    lms:\n      release: 2026-10-05\n      due: 2026-10-19\n\n\nDisabled artifact (placeholder for future use)\nartifacts:\n  - id: project-brief\n    type: assignment\n    enabled: false\n\n\nPinning a custom template\nartifacts:\n  - id: my-poster\n    type: slides\n    output_formats: [revealjs]\n    stub_template: poster.qmd.j2              # single template for all formats\n\n  - id: lecture-slides\n    type: slides\n    output_formats: [revealjs, beamer]\n    stub_template:\n      default: slides.qmd.j2\n      beamer:  slides-beamer.qmd.j2          # per-format override\nSee Templates & Filters for full template resolution rules.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Artifacts"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html",
+    "href": "commands/generate.html",
+    "title": "generate",
+    "section": "",
+    "text": "Usage: quarto-coursegen generate [OPTIONS] [COURSE_YAML]\nReads course.yaml and writes .qmd skeleton files and Quarto config files.\nRun from the root of your course repository:",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#options",
+    "href": "commands/generate.html#options",
+    "title": "generate",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nArgument / Option\nShort\nDescription\n\n\n\n\nCOURSE_YAML\n\nPath to course.yaml (default: course.yaml in current directory)\n\n\n--force\n-f\nOverwrite existing content stubs\n\n\n--dry-run\n\nPrint what would be generated without writing any files\n\n\n--config\n-c\nPath to a coursegen.yaml config file\n\n\n--templates-dir\n\nCustom Jinja2 templates directory, searched before built-in templates\n\n\n--lang-dir\n\nCustom i18n lang directory, searched before built-in lang files\n\n\n--output-root\n\nRoot directory for all output (default: current directory)",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#overwrite-policy",
+    "href": "commands/generate.html#overwrite-policy",
+    "title": "generate",
+    "section": "Overwrite policy",
+    "text": "Overwrite policy\n\n\n\n\n\n\n\n\nFile type\nDefault\nWith --force\n\n\n\n\nContent stubs — content/**/*.qmd, index.qmd, _quarto.yml\nSkip if exists\nOverwrite\n\n\nGenerator-owned configs — _quarto-nav.yml, sub-project _quarto.ymls\nAlways overwrite\nAlways overwrite\n\n\n\nGenerator-owned config files reflect the current state of course.yaml (navigation structure, sub-project file lists) and must never contain hand edits. All other stubs are hand-editable and are protected by default.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#config-file-auto-discovery",
+    "href": "commands/generate.html#config-file-auto-discovery",
+    "title": "generate",
+    "section": "Config file auto-discovery",
+    "text": "Config file auto-discovery\nIf --config is not passed, the command searches for a config file in the current directory in this order:\n\ncoursegen.yaml\n.coursegen.yaml\ncoursegen.yml\n.coursegen.yml\n\nSee Configuration file for the full config reference.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#precedence",
+    "href": "commands/generate.html#precedence",
+    "title": "generate",
+    "section": "Precedence",
+    "text": "Precedence\nCLI arguments  &gt;  coursegen.yaml  &gt;  built-in defaults",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#template-search-order",
+    "href": "commands/generate.html#template-search-order",
+    "title": "generate",
+    "section": "Template search order",
+    "text": "Template search order\nWhen generating a stub, templates are searched in this order:\n\nDirectories passed via --templates-dir (left-to-right)\ntemplates/ directory in the course project (if it exists and no --templates-dir was given)\nBuilt-in package templates\n\nSee Templates & Filters for the full resolution algorithm.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "commands/generate.html#generated-project-layout",
+    "href": "commands/generate.html#generated-project-layout",
+    "title": "generate",
+    "section": "Generated project layout",
+    "text": "Generated project layout\nAfter a successful generate run the course project contains:\ncourse-repo/\n├── course.yaml\n├── _quarto.yml               ← generated once, then hand-editable\n├── _quarto-nav.yml           ← always regenerated\n├── index.qmd                 ← generated once, then hand-editable\n└── content/\n    ├── modules/              ← one .qmd per module\n    ├── slides/\n    │   ├── _quarto.yml       ← always regenerated\n    │   └── *-slides.qmd      ← generated once, then hand-editable\n    ├── handouts/\n    │   ├── _quarto.yml       ← always regenerated\n    │   └── *-handout.qmd\n    ├── notes/\n    │   └── *-notes.qmd\n    ├── assignments/\n    │   ├── _quarto.yml       ← always regenerated\n    │   └── *-assignment.qmd\n    └── syllabus.qmd",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Commands",
+      "generate"
+    ]
+  },
+  {
+    "objectID": "templates.html",
+    "href": "templates.html",
+    "title": "Templates & Filters",
+    "section": "",
+    "text": "The generator uses Jinja2 templates to produce .qmd stub files. One built-in template exists per artifact type; all can be overridden locally.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "templates.html#built-in-templates",
+    "href": "templates.html#built-in-templates",
+    "title": "Templates & Filters",
+    "section": "Built-in templates",
+    "text": "Built-in templates\n\n\n\n\n\n\n\nTemplate\nUsed for\n\n\n\n\nslides.qmd.j2\ntype: slides artifacts\n\n\nhandout.qmd.j2\ntype: handout artifacts\n\n\nnotes.qmd.j2\ntype: notes artifacts\n\n\nassignment.qmd.j2\ntype: assignment artifacts\n\n\nsyllabus.qmd.j2\ntype: syllabus artifacts\n\n\nmodule.qmd.j2\nModule landing pages\n\n\nindex.qmd.j2\nCourse website home page\n\n\ndefault_template.qmd.j2\nAny unknown artifact type\n\n\n_quarto.yml.j2\nRoot Quarto project config (generated once)\n\n\n_quarto-nav.yml.j2\nNavigation config (always regenerated)\n\n\nslides-project.yml.j2\nSlides sub-project config (always regenerated)\n\n\nhandouts-project.yml.j2\nHandouts sub-project config (always regenerated)\n\n\nassignments-project.yml.j2\nAssignments sub-project config (always regenerated)",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "templates.html#template-resolution-order",
+    "href": "templates.html#template-resolution-order",
+    "title": "Templates & Filters",
+    "section": "Template resolution order",
+    "text": "Template resolution order\nFor each enabled artifact the generator searches for its Jinja2 template using this priority order (first match wins):\n\n{artifact_id}.{output_format}.qmd.j2 — id + format specific\n{artifact_id}.qmd.j2 — id specific\n{artifact_type}.{output_format}.qmd.j2 — type + format specific\n{artifact_type}.qmd.j2 — type specific (e.g. slides.qmd.j2)\ndefault_template.qmd.j2 — generic fallback\n\nTemplates are searched across all template directories in order: local overlay directories first, built-in package templates last.\n\nPinning a template in course.yaml\nartifacts:\n  - id: my-poster\n    type: slides\n    output_formats: [revealjs]\n    stub_template: poster.qmd.j2          # single template for all formats\n\n  - id: lecture-slides\n    type: slides\n    output_formats: [revealjs, beamer]\n    stub_template:\n      default: slides.qmd.j2\n      beamer:  slides-beamer.qmd.j2       # per-format override\nWhen stub_template is a string, it is used for all formats. When it is a dict, format-specific keys are tried first, then default.",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "templates.html#local-template-overrides",
+    "href": "templates.html#local-template-overrides",
+    "title": "Templates & Filters",
+    "section": "Local template overrides",
+    "text": "Local template overrides\nquarto-coursegen init copies all built-in templates into templates/ in your course project. Edit any of them freely — the generator searches that directory before the built-in ones.\nYou can also pass a custom directory at the command line:\nquarto-coursegen generate --templates-dir /path/to/my/templates\nOr configure it persistently in coursegen.yaml:\ntemplates: templates/",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "templates.html#jinja2-environment",
+    "href": "templates.html#jinja2-environment",
+    "title": "Templates & Filters",
+    "section": "Jinja2 environment",
+    "text": "Jinja2 environment\nAll templates have access to the following variables (exact set varies by template):\n\ncourse — the full parsed course.yaml course: block\nmodules — list of all module dicts (after defaults have been applied)\nmodule — current module dict (for per-module templates)\nartifact — current artifact dict (for per-artifact templates)\ni18n — resolved i18n strings dict",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "templates.html#custom-jinja2-filters",
+    "href": "templates.html#custom-jinja2-filters",
+    "title": "Templates & Filters",
+    "section": "Custom Jinja2 filters",
+    "text": "Custom Jinja2 filters\nThree custom filters are available in all templates for working with artifact lists. They are especially useful in module.qmd.j2 and _quarto-nav.yml.j2.\n\nof_type(type_name)\nFilters a list of artifacts to those matching a given type.\n{# All enabled slides for this module #}\n{% set slides_list = module.artifacts | of_type(\"slides\") | enabled %}\n{% if slides_list %}\n{% set slides = slides_list | first %}\n[View slides]({{ slides.file | basename | replace('.qmd', '.html') }})\n{% endif %}\n\n\nenabled\nFilters a list of artifacts to those with enabled: true (the default when enabled is absent).\n{# Loop over all materials that should be shown #}\n{% for artifact in module.artifacts | enabled %}\n- **{{ artifact.type | capitalize }}**: {{ artifact.file }}\n{% endfor %}\n\n\nby_id(artifact_id)\nReturns the first artifact with the given id, or None if not found.\n{# Reference a specific artifact by id #}\n{% set overview = module.artifacts | by_id(\"intro-slides\") %}\n{% if overview %}…{% endif %}\n\n\nbasename\nReturns the filename component of a path string.\n{{ artifact.file | basename }}\n{# content/slides/intro-slides.qmd → intro-slides.qmd #}\n\n\nCombining filters\nJinja2’s built-in first filter complements these well:\n{% set deck = module.artifacts | of_type(\"slides\") | enabled | first %}\n{% if deck %}\n- [Slides]({{ deck.file | basename | replace('.qmd', '.html') }})\n{% endif %}",
+    "crumbs": [
+      "Home",
+      "Reference",
+      "Templates & Filters"
+    ]
+  },
+  {
+    "objectID": "rendering.html",
+    "href": "rendering.html",
+    "title": "Rendering",
+    "section": "",
+    "text": "Stage 2 of the workflow: turning completed .qmd files into HTML, PDF, and slide formats using Quarto.",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  },
+  {
+    "objectID": "rendering.html#sub-project-architecture",
+    "href": "rendering.html#sub-project-architecture",
+    "title": "Rendering",
+    "section": "Sub-project architecture",
+    "text": "Sub-project architecture\nEach output type is an independent Quarto sub-project rooted in a subdirectory of content/.\nWhy sub-projects and not Quarto profiles? Profiles merge onto the base _quarto.yml (a website project), which causes project-type and format bleed — slides are accidentally rendered as website pages, or website navigation leaks into PDF output. Independent sub-projects have their own _quarto.yml with an isolated project type and format config, which avoids all of these issues.\n\n\n\n\n\n\n\n\n\nSub-project\nDirectory\n_quarto.yml\nFormats\n\n\n\n\nWebsite\nproject root\n_quarto.yml\nhtml\n\n\nSlides\ncontent/slides/\ncontent/slides/_quarto.yml\nrevealjs, beamer\n\n\nHandouts\ncontent/handouts/\ncontent/handouts/_quarto.yml\npdf\n\n\nAssignments\ncontent/assignments/\ncontent/assignments/_quarto.yml\nhtml, pdf\n\n\n\nThe three sub-project _quarto.yml files are always regenerated by quarto-coursegen generate. Do not edit them by hand — they will be overwritten on the next generate run.",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  },
+  {
+    "objectID": "rendering.html#makefile-targets",
+    "href": "rendering.html#makefile-targets",
+    "title": "Rendering",
+    "section": "Makefile targets",
+    "text": "Makefile targets\nThe Makefile created by quarto-coursegen init provides these targets:\nmake website      # quarto render (root project → docs/)\nmake slides       # quarto render content/slides/\nmake handouts     # quarto render content/handouts/\nmake assignments  # quarto render content/assignments/\nmake all          # website + slides + handouts + assignments\nmake clean        # remove Quarto render caches\nmake clean-all    # remove docs/ output as well",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  },
+  {
+    "objectID": "rendering.html#quarto-extensions",
+    "href": "rendering.html#quarto-extensions",
+    "title": "Rendering",
+    "section": "Quarto extensions",
+    "text": "Quarto extensions\nThe built-in templates reference the fontawesome extension. Install it once in the course project root:\nquarto add quarto-ext/fontawesome",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  },
+  {
+    "objectID": "rendering.html#switching-from-beamer-to-decktape-for-slide-pdfs",
+    "href": "rendering.html#switching-from-beamer-to-decktape-for-slide-pdfs",
+    "title": "Rendering",
+    "section": "Switching from Beamer to decktape for slide PDFs",
+    "text": "Switching from Beamer to decktape for slide PDFs\nBy default, PDF slides are produced via Quarto’s Beamer format. As an alternative, decktape can generate PDFs directly from the rendered reveal.js HTML — often with better visual fidelity (faithful colours, custom fonts, animations).\n\nStep 1 — Remove beamer from course.yaml\n# course.yaml\nartifacts:\n  - id: intro-slides\n    type: slides\n    output_formats: [revealjs]   # was: [revealjs, beamer]\nThen regenerate to update the slides sub-project config and any new stubs:\nquarto-coursegen generate\n\n\nStep 2 — Add a slides-pdf target to the Makefile\nslides:\n    quarto render content/slides/\n\nslides-pdf: slides\n    for f in docs/slides/*-slides.html; do \\\n        decktape reveal \"$$f\" \"$${f%.html}.pdf\"; \\\n    done\n\nall: website slides slides-pdf handouts assignments\n\n\nRequirements\n\ndecktape must be installed and on PATH:\nnpm install -g decktape\ndecktape drives a headless Chromium instance. In CI environments, a virtual framebuffer may be needed:\nxvfb-run make slides-pdf",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  },
+  {
+    "objectID": "rendering.html#output-directory-layout",
+    "href": "rendering.html#output-directory-layout",
+    "title": "Rendering",
+    "section": "Output directory layout",
+    "text": "Output directory layout\nAfter make all the rendered output is in docs/:\ndocs/\n├── index.html                ← course website home\n├── modules/\n│   └── *.html\n├── slides/\n│   ├── *-slides.html         ← reveal.js\n│   └── *-slides.pdf          ← Beamer (or decktape) PDFs\n├── handouts/\n│   └── *-handout.pdf\n└── assignments/\n    ├── *-assignment.html\n    └── *-assignment.pdf\nThis layout is compatible with GitHub Pages (serve from docs/ on the main branch, or deploy via gh-pages).",
+    "crumbs": [
+      "Home",
+      "Guides",
+      "Rendering"
+    ]
+  }
+]
