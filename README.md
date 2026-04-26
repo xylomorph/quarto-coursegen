@@ -1,13 +1,28 @@
-# quarto-coursegen
+# 🎓 quarto-coursegen
+
+<div align="center">
+  <p align="center">
+ 📖 <a href="https://sebastiancacean.de/quarto-coursegen">Documentation</a>
+ </p>
+</div>
+<br/>
 
 A CLI tool that scaffolds [Quarto](https://quarto.org/) course websites from a
 single `course.yaml` definition file.
 
-**→ Full documentation: `docs/index.html` (rendered from `docs_src/`)**
 
----
+## ✨ Features
 
-## Installation
+- **Single source of truth** — define your entire course (modules, artifacts, schedule, instructors) in one `course.yaml` file
+- **Two-stage pipeline** — separate *generation* (scaffold `.qmd` stubs + Quarto config) from *rendering* (Quarto → HTML/PDF)
+- **Multiple output formats** — reveal.js slides, Beamer PDF, HTML handouts, PDF assignments, and a full course website from the same source
+- **Smart overwrite policy** — stubs are never overwritten after the first run; navigation and sub-project configs are always kept up to date
+- **Customisable templates** — override any built-in Jinja2 template locally without forking the tool
+- **i18n support** — UI strings and labels are externalised in `lang/*.yaml` (English and German included)
+- **`init` command** — bootstraps a ready-to-use course repo with a sensible directory structure in one step
+
+
+## 📦 Installation
 
 Requires Python ≥ 3.11.
 
@@ -21,9 +36,8 @@ Or with [uv](https://docs.astral.sh/uv/):
 uv tool install quarto-coursegen
 ```
 
----
 
-## Quick start
+## 🚀 Quick Start
 
 ```bash
 # 1. Create and bootstrap a new course project
@@ -44,11 +58,10 @@ make handouts          # PDF handouts → docs/handouts/
 ```
 
 For the full reference — `course.yaml` schema, command options, templates,
-i18n, rendering guide, Python API — see the **[documentation](docs/index.html)**.
+i18n, rendering guide, Python API — see the **[documentation](https://sebastiancacean.de/quarto-coursegen/)**.
 
----
 
-## Project layout (generated course repo)
+## 📁 Project layout (generated course repo)
 
 ```
 course-repo/
@@ -75,9 +88,8 @@ course-repo/
     └── syllabus.qmd
 ```
 
----
 
-## Development
+## 🧑‍💻 Development
 
 ```bash
 git clone https://github.com/xylomorph/quarto-coursegen.git
@@ -86,13 +98,27 @@ uv sync --dev
 uv run pytest
 ```
 
-### Building the documentation
+### 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python ≥ 3.11 |
+| CLI framework | [Typer](https://typer.tiangolo.com/) |
+| Templating | [Jinja2](https://jinja.palletsprojects.com/) |
+| Config parsing | [PyYAML](https://pyyaml.org/) + [Pydantic](https://docs.pydantic.dev/) |
+| Output formatting | [Rich](https://github.com/Textualize/rich) |
+| Publishing | [Quarto](https://quarto.org/) |
+| Package manager | [uv](https://docs.astral.sh/uv/) |
+| Testing | [pytest](https://pytest.org/) |
+
+
+### 📚 Building the documentation
 
 ```bash
 quarto render docs_src/      # output → docs/
 ```
 
-### Package layout
+### 🗂️ Package layout
 
 ```
 src/quarto_coursegen/
