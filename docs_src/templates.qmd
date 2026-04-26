@@ -1,0 +1,160 @@
+---
+title: "Templates & Filters"
+---
+
+The generator uses [Jinja2](https://jinja.palletsprojects.com/) templates to
+produce `.qmd` stub files.
+One built-in template exists per artifact type; all can be overridden locally.
+
+---
+
+## Built-in templates
+
+| Template | Used for |
+|----------|----------|
+| `slides.qmd.j2` | `type: slides` artifacts |
+| `handout.qmd.j2` | `type: handout` artifacts |
+| `notes.qmd.j2` | `type: notes` artifacts |
+| `assignment.qmd.j2` | `type: assignment` artifacts |
+| `syllabus.qmd.j2` | `type: syllabus` artifacts |
+| `module.qmd.j2` | Module landing pages |
+| `index.qmd.j2` | Course website home page |
+| `default_template.qmd.j2` | Any unknown artifact type |
+| `_quarto.yml.j2` | Root Quarto project config (generated once) |
+| `_quarto-nav.yml.j2` | Navigation config (always regenerated) |
+| `slides-project.yml.j2` | Slides sub-project config (always regenerated) |
+| `handouts-project.yml.j2` | Handouts sub-project config (always regenerated) |
+| `assignments-project.yml.j2` | Assignments sub-project config (always regenerated) |
+
+---
+
+## Template resolution order
+
+For each enabled artifact the generator searches for its Jinja2 template using
+this priority order (first match wins):
+
+1. `{artifact_id}.{output_format}.qmd.j2` — id + format specific
+2. `{artifact_id}.qmd.j2` — id specific
+3. `{artifact_type}.{output_format}.qmd.j2` — type + format specific
+4. `{artifact_type}.qmd.j2` — type specific (e.g. `slides.qmd.j2`)
+5. `default_template.qmd.j2` — generic fallback
+
+Templates are searched across all template directories in order:
+local overlay directories first, built-in package templates last.
+
+### Pinning a template in `course.yaml`
+
+```yaml
+artifacts:
+  - id: my-poster
+    type: slides
+    output_formats: [revealjs]
+    stub_template: poster.qmd.j2          # single template for all formats
+
+  - id: lecture-slides
+    type: slides
+    output_formats: [revealjs, beamer]
+    stub_template:
+      default: slides.qmd.j2
+      beamer:  slides-beamer.qmd.j2       # per-format override
+```
+
+When `stub_template` is a **string**, it is used for all formats.
+When it is a **dict**, format-specific keys are tried first, then `default`.
+
+---
+
+## Local template overrides
+
+`quarto-coursegen init` copies all built-in templates into `templates/` in your
+course project.
+Edit any of them freely — the generator searches that directory before the
+built-in ones.
+
+You can also pass a custom directory at the command line:
+
+```bash
+quarto-coursegen generate --templates-dir /path/to/my/templates
+```
+
+Or configure it persistently in `coursegen.yaml`:
+
+```yaml
+templates: templates/
+```
+
+---
+
+## Jinja2 environment
+
+All templates have access to the following variables (exact set varies by
+template):
+
+- `course` — the full parsed `course.yaml` `course:` block
+- `modules` — list of all module dicts (after defaults have been applied)
+- `module` — current module dict (for per-module templates)
+- `artifact` — current artifact dict (for per-artifact templates)
+- `i18n` — resolved i18n strings dict
+
+---
+
+## Custom Jinja2 filters
+
+Three custom filters are available in all templates for working with artifact
+lists.
+They are especially useful in `module.qmd.j2` and `_quarto-nav.yml.j2`.
+
+### `of_type(type_name)`
+
+Filters a list of artifacts to those matching a given `type`.
+
+```jinja2
+{# All enabled slides for this module #}
+{% set slides_list = module.artifacts | of_type("slides") | enabled %}
+{% if slides_list %}
+{% set slides = slides_list | first %}
+[View slides]({{ slides.file | basename | replace('.qmd', '.html') }})
+{% endif %}
+```
+
+### `enabled`
+
+Filters a list of artifacts to those with `enabled: true`
+(the default when `enabled` is absent).
+
+```jinja2
+{# Loop over all materials that should be shown #}
+{% for artifact in module.artifacts | enabled %}
+- **{{ artifact.type | capitalize }}**: {{ artifact.file }}
+{% endfor %}
+```
+
+### `by_id(artifact_id)`
+
+Returns the first artifact with the given `id`, or `None` if not found.
+
+```jinja2
+{# Reference a specific artifact by id #}
+{% set overview = module.artifacts | by_id("intro-slides") %}
+{% if overview %}…{% endif %}
+```
+
+### `basename`
+
+Returns the filename component of a path string.
+
+```jinja2
+{{ artifact.file | basename }}
+{# content/slides/intro-slides.qmd → intro-slides.qmd #}
+```
+
+### Combining filters
+
+Jinja2's built-in `first` filter complements these well:
+
+```jinja2
+{% set deck = module.artifacts | of_type("slides") | enabled | first %}
+{% if deck %}
+- [Slides]({{ deck.file | basename | replace('.qmd', '.html') }})
+{% endif %}
+```

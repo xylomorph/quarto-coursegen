@@ -1,0 +1,137 @@
+---
+title: "Python API"
+---
+
+`quarto-coursegen` exposes a clean Python API for programmatic use.
+The main entry point is `generate()`, which accepts a `CoursegenConfig` object.
+
+---
+
+## Quick example
+
+```python
+from pathlib import Path
+from quarto_coursegen import generate, resolve_config
+
+cfg = resolve_config(
+    course_yaml=Path("course.yaml"),
+    output_root=Path("."),
+    force=False,
+    dry_run=False,
+)
+generate(cfg)
+```
+
+`resolve_config` handles the full precedence chain —
+CLI arguments > `coursegen.yaml` > built-in defaults — and returns a
+populated `CoursegenConfig`.
+
+---
+
+## `CoursegenConfig`
+
+```python
+from quarto_coursegen.config import CoursegenConfig, BUILTIN_TEMPLATES_DIR, BUILTIN_LANG_DIR
+from pathlib import Path
+
+cfg = CoursegenConfig(
+    course_yaml=Path("course.yaml"),
+    output_root=Path("."),
+    templates_dirs=[Path("templates/"), BUILTIN_TEMPLATES_DIR],  # local overlay first
+    lang_dirs=[BUILTIN_LANG_DIR],
+    force=False,
+    dry_run=False,
+)
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `course_yaml` | `Path` | Path to `course.yaml` |
+| `output_root` | `Path` | Root directory for all generated output |
+| `templates_dirs` | `list[Path]` | Template search path — first match wins |
+| `lang_dirs` | `list[Path]` | Lang file search path — first match wins |
+| `force` | `bool` | Overwrite existing content stubs |
+| `dry_run` | `bool` | Print planned actions without writing any files |
+
+The property `cfg.content_dir` returns `output_root / "content"`.
+
+---
+
+## `resolve_config`
+
+```python
+from quarto_coursegen.config import resolve_config
+
+cfg = resolve_config(
+    course_yaml=None,        # Path | None → auto-discovers course.yaml
+    config_file=None,        # Path | None → auto-discovers coursegen.yaml
+    output_root=None,        # Path | None → cwd
+    templates_dirs=None,     # list[Path] | None
+    lang_dirs=None,          # list[Path] | None
+    force=False,
+    dry_run=False,
+)
+```
+
+All arguments are optional.
+`None` triggers auto-discovery or built-in defaults.
+
+---
+
+## `generate`
+
+```python
+from quarto_coursegen.generators import generate
+
+generate(cfg)   # cfg: CoursegenConfig
+```
+
+Runs the full generation pipeline:
+
+1. Load and normalise `course.yaml`
+2. Resolve i18n strings
+3. Generate module pages
+4. Generate artifact stubs
+5. Generate course-level artifacts (syllabus, etc.)
+6. Generate `index.qmd` and `_quarto.yml` (skip if exists)
+7. Generate `_quarto-nav.yml` (always overwrite)
+8. Generate sub-project `_quarto.yml` files (always overwrite)
+
+---
+
+## Low-level functions
+
+For custom pipelines you can call individual generator functions directly:
+
+```python
+from quarto_coursegen.generators import (
+    generate_module_page,
+    generate_artifact_stubs,
+    generate_nav_config,
+    generate_subproject_configs,
+)
+from quarto_coursegen.config import load_course, load_i18n
+from quarto_coursegen.env import make_jinja_env
+
+course = load_course(Path("course.yaml"))
+env = make_jinja_env([Path("templates/"), BUILTIN_TEMPLATES_DIR])
+i18n = load_i18n(course["course"], [BUILTIN_LANG_DIR])
+```
+
+---
+
+## Package constants
+
+```python
+from quarto_coursegen.config import BUILTIN_TEMPLATES_DIR, BUILTIN_LANG_DIR
+```
+
+| Constant | Description |
+|----------|-------------|
+| `BUILTIN_TEMPLATES_DIR` | `Path` to the built-in `templates/` directory inside the package |
+| `BUILTIN_LANG_DIR` | `Path` to the built-in `lang/` directory inside the package |
+
+Both are resolved via `importlib.resources` and are safe across all packaging
+formats (wheel, editable install, zipapp).

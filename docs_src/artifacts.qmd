@@ -1,0 +1,161 @@
+---
+title: "Artifacts"
+---
+
+An *artifact* is a single deliverable produced for a module (or for the whole
+course): a slide deck, a handout, an assignment, notes, a syllabus, etc.
+
+Artifacts are declared in `course.yaml` under a module's `artifacts:` list or
+at the top-level `artifacts:` list for course-wide documents.
+
+---
+
+## Artifact fields
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `id` | `{type}-{index}` | Unique identifier within the scope (module or course) |
+| `type` | — | Drives template resolution and subdirectory placement |
+| `enabled` | `true` | Whether to generate a stub and include in Quarto configs |
+| `status` | `planned` | Lifecycle status — metadata only |
+| `file` | computed | Explicit output path; overrides the computed default |
+| `output_formats` | — | List of render formats: `revealjs`, `beamer`, `pdf`, `website` |
+| `stub_template` | auto-resolved | Jinja2 template name: string or per-format dict |
+
+---
+
+## Default file paths
+
+When `file:` is not set, the generator computes:
+
+```
+content/{subdir}/{scope_id}-{artifact_type}.qmd
+```
+
+where `{subdir}` is determined by artifact type:
+
+| Artifact type | Subdirectory |
+|---------------|-------------|
+| `slides` | `content/slides/` |
+| `handout` | `content/handouts/` |
+| `notes` | `content/notes/` |
+| `assignment` | `content/assignments/` |
+| `syllabus` | `content/` |
+| any other | `content/{type}/` |
+
+**Example:** module `id: intro` with artifact `type: slides` produces
+`content/slides/intro-slides.qmd`.
+
+---
+
+## Output formats
+
+Each artifact declares which Quarto render formats it participates in via the
+`output_formats` list.
+The generator uses this to include the artifact in the correct sub-project
+`_quarto.yml` and to emit matching format blocks in the stub front matter.
+
+| Format | Sub-project | Output |
+|--------|-------------|--------|
+| `revealjs` | `content/slides/` | reveal.js HTML slides |
+| `beamer` | `content/slides/` | Beamer PDF slides |
+| `pdf` | `content/handouts/` or `content/assignments/` | PDF document |
+| `website` | root website project | HTML page embedded in course website |
+
+---
+
+## The "Other Formats" sidebar link
+
+When a Quarto document declares **multiple formats** in its YAML front matter,
+Quarto automatically renders an "Other Formats" entry in the right-hand sidebar,
+linking to the alternative output (e.g. a PDF download link on an HTML page).
+
+Whether this link appears is controlled entirely by the **stub template**, not
+by the renderer.
+The built-in templates conditionally emit a second format block based on
+`output_formats`:
+
+| Template | Condition | Emitted formats in stub |
+|----------|-----------|------------------------|
+| `handout.qmd.j2` | `website` in `output_formats` | `html: default` + `pdf: …` |
+| `handout.qmd.j2` | `website` **not** in `output_formats` | `pdf: …` only |
+| `notes.qmd.j2` | `pdf` in `output_formats` | `html: default` + `pdf: …` |
+| `notes.qmd.j2` | `pdf` **not** in `output_formats` | `html: default` only |
+| `assignment.qmd.j2` | always | `html: default` + `pdf: …` |
+
+To enable the "Other Formats: PDF" link for a handout, declare both formats:
+
+```yaml
+artifacts:
+  - id: intro-handout
+    type: handout
+    output_formats: [website, pdf]   # both → "Other Formats: PDF" appears
+```
+
+Custom stub templates follow the same rule: declare both formats in the
+generated front matter and Quarto produces the sidebar link automatically.
+
+---
+
+## Examples
+
+### Slides with Beamer PDF
+
+```yaml
+artifacts:
+  - id: intro-slides
+    type: slides
+    enabled: true
+    output_formats: [revealjs, beamer]
+```
+
+### Handout with website page and PDF download
+
+```yaml
+artifacts:
+  - id: intro-handout
+    type: handout
+    enabled: true
+    output_formats: [website, pdf]
+```
+
+### Assignment (website + PDF)
+
+```yaml
+artifacts:
+  - id: ex01
+    type: assignment
+    enabled: true
+    output_formats: [website, pdf]
+    lms:
+      release: 2026-10-05
+      due: 2026-10-19
+```
+
+### Disabled artifact (placeholder for future use)
+
+```yaml
+artifacts:
+  - id: project-brief
+    type: assignment
+    enabled: false
+```
+
+### Pinning a custom template
+
+```yaml
+artifacts:
+  - id: my-poster
+    type: slides
+    output_formats: [revealjs]
+    stub_template: poster.qmd.j2              # single template for all formats
+
+  - id: lecture-slides
+    type: slides
+    output_formats: [revealjs, beamer]
+    stub_template:
+      default: slides.qmd.j2
+      beamer:  slides-beamer.qmd.j2          # per-format override
+```
+
+See [Templates & Filters](templates.qmd) for full template resolution rules.

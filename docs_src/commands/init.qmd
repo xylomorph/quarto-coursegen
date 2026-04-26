@@ -1,0 +1,94 @@
+---
+title: "init"
+---
+
+```
+Usage: quarto-coursegen init [OPTIONS] [COURSE_DIR]
+```
+
+Bootstrap a new Quarto course project directory.
+
+Copies the bundled skeleton files, Jinja2 templates, and language files into
+the target directory, creating it if necessary.
+Nothing is overwritten unless `--force` is given.
+
+---
+
+## What gets created
+
+| Path | Description |
+|------|-------------|
+| `course.yaml` | Starter course definition — edit this first |
+| `Makefile` | Rendering targets (`make website`, `make slides`, …) |
+| `styles/custom.scss` | Website HTML theme stub |
+| `styles/slides.scss` | reveal.js theme stub |
+| `.gitignore` | Ignores `docs/`, Quarto caches, `.venv/` |
+| `templates/*.j2` | All built-in Jinja2 templates — ready for local customisation |
+| `lang/*.yaml` | Built-in language files (`en.yaml`, `de.yaml`) — add or override strings |
+
+::: {.callout-note}
+The `Makefile` contains only rendering targets (`make website`, `make slides`,
+`make handouts`, `make assignments`, `make all`, `make clean`).
+There is no `make generate` target — generation is handled by the
+`quarto-coursegen generate` CLI command.
+:::
+
+---
+
+## Usage
+
+```bash
+# Initialise the current directory
+quarto-coursegen init
+
+# Create and initialise a named directory
+quarto-coursegen init my-course
+
+# Preview what would be created without writing anything
+quarto-coursegen init my-course --dry-run
+
+# Overwrite files that already exist
+quarto-coursegen init my-course --force
+```
+
+---
+
+## Options
+
+| Argument / Option | Short | Description |
+|-------------------|-------|-------------|
+| `COURSE_DIR` | | Directory to initialise (default: current directory) |
+| `--force` | `-f` | Overwrite existing files |
+| `--dry-run` | | Print planned actions without writing any files |
+
+---
+
+## Typical workflow after `init`
+
+```bash
+quarto-coursegen init my-course
+cd my-course
+
+# Install the fontawesome Quarto extension (used by built-in templates)
+quarto add quarto-ext/fontawesome
+
+# Edit course.yaml
+$EDITOR course.yaml
+
+# Scaffold .qmd stubs
+quarto-coursegen generate
+
+# Render
+make website
+```
+
+---
+
+## Local template customisation
+
+Because `init` copies the built-in templates into `templates/` in your project,
+you can customise them freely without modifying the package.
+The `generate` command automatically searches `templates/` in your project
+before falling back to the built-in package templates.
+
+See [Templates & Filters](../templates.qmd) for details.

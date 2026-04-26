@@ -1,0 +1,86 @@
+---
+title: "Internationalisation"
+---
+
+`quarto-coursegen` supports i18n strings in generated `.qmd` stubs (labels,
+section headings, navigation text, etc.).
+The active language is set once in `course.yaml`.
+
+---
+
+## Setting the language
+
+```yaml
+course:
+  language: "de"    # default: "en"
+```
+
+Built-in languages: **`en`** (English) and **`de`** (German).
+
+---
+
+## Resolution order
+
+Language strings are resolved from highest to lowest priority:
+
+1. **Inline `i18n:` overrides** in `course.yaml`
+2. **First matching `{lang}.yaml`** found across lang directories
+   (local overlay first, built-in fallback)
+3. **Built-in English defaults** — always the base
+
+---
+
+## Adding a new language
+
+`quarto-coursegen init` copies `lang/en.yaml` and `lang/de.yaml` into your
+course project.
+To add a new language, create `lang/{code}.yaml` following the same structure:
+
+```yaml
+# lang/fr.yaml
+nav:
+  home: "Accueil"
+  modules: "Modules"
+  …
+```
+
+Partial files are fine — only the keys present override the English defaults.
+Omitted keys fall back to English automatically.
+
+---
+
+## Inline overrides
+
+Override individual strings directly in `course.yaml` without creating a
+separate lang file:
+
+```yaml
+course:
+  language: de
+  i18n:
+    nav:
+      home: Startseite    # overrides the German lang file value
+```
+
+Inline overrides have the highest priority — they override both the lang file
+and the built-in defaults.
+
+---
+
+## Custom lang directory
+
+Pass a custom directory at the command line:
+
+```bash
+quarto-coursegen generate --lang-dir /path/to/my/lang
+```
+
+Or configure it in `coursegen.yaml`:
+
+```yaml
+lang: lang/
+```
+
+When multiple lang directories are configured, the first directory that
+contains a matching `{lang}.yaml` wins.
+The built-in lang files act as the final fallback.

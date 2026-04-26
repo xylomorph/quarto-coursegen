@@ -1,0 +1,115 @@
+---
+title: "generate"
+---
+
+```
+Usage: quarto-coursegen generate [OPTIONS] [COURSE_YAML]
+```
+
+Reads `course.yaml` and writes `.qmd` skeleton files and Quarto config files.
+
+Run from the root of your course repository:
+
+```bash
+# Scaffold all missing stubs (skips files that already exist)
+quarto-coursegen generate
+
+# Same, but specify course.yaml explicitly
+quarto-coursegen generate path/to/course.yaml
+
+# Preview what would be written without touching any files
+quarto-coursegen generate --dry-run
+
+# Overwrite existing content stubs (caution — loses manual edits)
+quarto-coursegen generate --force
+```
+
+---
+
+## Options
+
+| Argument / Option | Short | Description |
+|-------------------|-------|-------------|
+| `COURSE_YAML` | | Path to `course.yaml` (default: `course.yaml` in current directory) |
+| `--force` | `-f` | Overwrite existing content stubs |
+| `--dry-run` | | Print what would be generated without writing any files |
+| `--config` | `-c` | Path to a `coursegen.yaml` config file |
+| `--templates-dir` | | Custom Jinja2 templates directory, searched before built-in templates |
+| `--lang-dir` | | Custom i18n lang directory, searched before built-in lang files |
+| `--output-root` | | Root directory for all output (default: current directory) |
+
+---
+
+## Overwrite policy
+
+| File type | Default | With `--force` |
+|-----------|---------|----------------|
+| Content stubs — `content/**/*.qmd`, `index.qmd`, `_quarto.yml` | **Skip** if exists | Overwrite |
+| Generator-owned configs — `_quarto-nav.yml`, sub-project `_quarto.yml`s | **Always overwrite** | Always overwrite |
+
+Generator-owned config files reflect the current state of `course.yaml`
+(navigation structure, sub-project file lists) and must never contain hand
+edits.
+All other stubs are hand-editable and are protected by default.
+
+---
+
+## Config file auto-discovery
+
+If `--config` is not passed, the command searches for a config file in the
+current directory in this order:
+
+1. `coursegen.yaml`
+2. `.coursegen.yaml`
+3. `coursegen.yml`
+4. `.coursegen.yml`
+
+See [Configuration file](../configuration.qmd) for the full config reference.
+
+---
+
+## Precedence
+
+```
+CLI arguments  >  coursegen.yaml  >  built-in defaults
+```
+
+---
+
+## Template search order
+
+When generating a stub, templates are searched in this order:
+
+1. Directories passed via `--templates-dir` (left-to-right)
+2. `templates/` directory in the course project (if it exists and no `--templates-dir` was given)
+3. Built-in package templates
+
+See [Templates & Filters](../templates.qmd) for the full resolution algorithm.
+
+---
+
+## Generated project layout
+
+After a successful `generate` run the course project contains:
+
+```
+course-repo/
+├── course.yaml
+├── _quarto.yml               ← generated once, then hand-editable
+├── _quarto-nav.yml           ← always regenerated
+├── index.qmd                 ← generated once, then hand-editable
+└── content/
+    ├── modules/              ← one .qmd per module
+    ├── slides/
+    │   ├── _quarto.yml       ← always regenerated
+    │   └── *-slides.qmd      ← generated once, then hand-editable
+    ├── handouts/
+    │   ├── _quarto.yml       ← always regenerated
+    │   └── *-handout.qmd
+    ├── notes/
+    │   └── *-notes.qmd
+    ├── assignments/
+    │   ├── _quarto.yml       ← always regenerated
+    │   └── *-assignment.qmd
+    └── syllabus.qmd
+```

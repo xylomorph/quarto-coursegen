@@ -1,0 +1,72 @@
+---
+title: "Installation"
+---
+
+## Prerequisites
+
+### Python
+
+Python **≥ 3.11** is required.
+
+### Quarto
+
+Install [Quarto](https://quarto.org/docs/get-started/) for your platform.
+`quarto-coursegen generate` only writes plain `.qmd` files and does not invoke
+Quarto, but you will need it for the rendering stage.
+
+### Quarto extensions
+
+The built-in `.qmd.j2` templates reference the
+[fontawesome](https://github.com/quarto-ext/fontawesome) extension.
+Install it once per course project after running `quarto-coursegen init`:
+
+```bash
+quarto add quarto-ext/fontawesome
+```
+
+## Installing quarto-coursegen
+
+### Via pip
+
+```bash
+pip install quarto-coursegen
+```
+
+### Via uv (recommended)
+
+[uv](https://docs.astral.sh/uv/) installs `quarto-coursegen` as an isolated
+CLI tool, available globally without activating a virtual environment:
+
+```bash
+uv tool install quarto-coursegen
+```
+
+To update later:
+
+```bash
+uv tool upgrade quarto-coursegen
+```
+
+### Verify the installation
+
+```bash
+quarto-coursegen --version
+```
+
+## Python virtual environments
+
+If you prefer a project-local install, create a virtual environment first:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install quarto-coursegen
+```
+
+## Upgrading
+
+```bash
+pip install --upgrade quarto-coursegen
+# or
+uv tool upgrade quarto-coursegen
+```

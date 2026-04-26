@@ -1,0 +1,80 @@
+---
+title: "Configuration File"
+---
+
+Instead of passing CLI flags every time, you can place a `coursegen.yaml`
+in the root of your course repository.
+The `generate` command discovers it automatically.
+
+---
+
+## Auto-discovery
+
+The command searches for a config file in the current directory in this order:
+
+1. `coursegen.yaml`
+2. `.coursegen.yaml`
+3. `coursegen.yml`
+4. `.coursegen.yml`
+
+You can also point to a config file explicitly:
+
+```bash
+quarto-coursegen generate --config /path/to/coursegen.yaml
+```
+
+---
+
+## Supported keys
+
+```yaml
+# coursegen.yaml
+
+course: course.yaml       # path to course.yaml, relative to this file
+output_root: .            # where content/, index.qmd, _quarto*.yml go
+templates: templates/     # local Jinja2 templates overlay (optional)
+lang: lang/               # local i18n lang directory overlay (optional)
+```
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `course` | `course.yaml` | Path to `course.yaml` |
+| `output_root` | `.` (current directory) | Root directory for all generated output |
+| `templates` | — | Local templates directory; searched before built-in templates |
+| `lang` | — | Local lang directory; searched before built-in lang files |
+
+---
+
+## Precedence
+
+```
+CLI arguments  >  coursegen.yaml  >  built-in defaults
+```
+
+CLI flags always take precedence over anything in `coursegen.yaml`.
+
+---
+
+## Example: multi-root layout
+
+If your `course.yaml` lives in a subdirectory, point `coursegen.yaml` at it:
+
+```yaml
+# coursegen.yaml
+course: config/course.yaml
+output_root: .
+templates: templates/
+lang: lang/
+```
+
+---
+
+## Example: custom output root
+
+To generate all output into a `build/` subdirectory:
+
+```yaml
+# coursegen.yaml
+course: course.yaml
+output_root: build/
+```

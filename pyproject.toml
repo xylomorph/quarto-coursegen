@@ -1,6 +1,6 @@
 [project]
 name = "quarto-coursegen"
-version = "0.1.0"
+version = "0.1.0b1"
 description = "Scaffold Quarto course websites from a course.yaml definition"
 readme = "README.md"
 authors = [

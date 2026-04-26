@@ -1,0 +1,97 @@
+---
+title: "Two-Stage Workflow"
+---
+
+## The core principle
+
+> **Never mix generation and rendering.**
+>
+> - Generation = structural, infrequent, potentially destructive
+> - Rendering = repeatable, safe, frequent
+
+`quarto-coursegen` owns only Stage 1.
+Stage 2 is handled entirely by Quarto.
+
+---
+
+## Stage 1 — Generation
+
+**Input:** `course.yaml`
+**Tool:** `quarto-coursegen generate`
+**Output:** `.qmd` skeleton files + Quarto config files under `content/`
+
+The generator reads your course definition and produces a set of structured
+`.qmd` stubs that you fill in with actual teaching content.
+Files that already exist are **never overwritten** (unless you pass `--force`),
+so running the generator repeatedly is safe.
+
+Config files that the generator fully owns are **always regenerated**
+from `course.yaml` so they stay in sync even as modules and artifacts change.
+
+### What gets generated
+
+| Output file | Template | Overwrite policy |
+|-------------|----------|-----------------|
+| `index.qmd` | `index.qmd.j2` | Never — hand-editable after first run |
+| `_quarto.yml` | `_quarto.yml.j2` | Never — hand-editable after first run |
+| `_quarto-nav.yml` | `_quarto-nav.yml.j2` | **Always** — generator-owned |
+| `content/modules/{id}.qmd` | `module.qmd.j2` | Never |
+| `content/slides/{id}-slides.qmd` | `slides.qmd.j2` | Never |
+| `content/handouts/{id}-handout.qmd` | `handout.qmd.j2` | Never |
+| `content/notes/{id}-notes.qmd` | `notes.qmd.j2` | Never |
+| `content/assignments/{id}-assignment.qmd` | `assignment.qmd.j2` | Never |
+| `content/syllabus.qmd` | `syllabus.qmd.j2` | Never |
+| `content/slides/_quarto.yml` | `slides-project.yml.j2` | **Always** — generator-owned |
+| `content/handouts/_quarto.yml` | `handouts-project.yml.j2` | **Always** — generator-owned |
+| `content/assignments/_quarto.yml` | `assignments-project.yml.j2` | **Always** — generator-owned |
+
+::: {.callout-note}
+File naming convention: when no explicit `file:` path is set in `course.yaml`,
+the generator uses `content/{subdir}/{module-id}-{artifact-type}.qmd`
+as the default path.
+:::
+
+---
+
+## Stage 2 — Rendering
+
+**Input:** completed `.qmd` files
+**Tool:** `quarto render` or `make <target>`
+**Output:** HTML, PDF, reveal.js slides, Beamer slides
+
+Each output type is an independent Quarto **sub-project** rooted in a
+subdirectory of `content/`.
+Quarto profiles are intentionally **not** used because profiles *merge* onto the
+base `_quarto.yml` (a website project), causing project-type and format bleed
+that breaks slides and PDF rendering.
+Independent sub-projects avoid this entirely.
+
+| Makefile target | Command | Output |
+|-----------------|---------|--------|
+| `make website` | `quarto render` | `docs/` — HTML website |
+| `make slides` | `quarto render content/slides/` | `docs/slides/` — reveal.js + Beamer |
+| `make handouts` | `quarto render content/handouts/` | `docs/handouts/` — PDF |
+| `make assignments` | `quarto render content/assignments/` | `docs/assignments/` — HTML + PDF |
+| `make all` | all of the above | everything |
+| `make clean` | removes `docs/` render cache | — |
+
+See [Rendering](rendering.qmd) for details on sub-project configuration,
+format options, and switching from Beamer to decktape for slide PDFs.
+
+---
+
+## Typical authoring loop
+
+1. Update `course.yaml` — add a module, change a date, enable an artifact.
+2. Run `quarto-coursegen generate` — new stubs are created; existing ones are untouched.
+3. Edit the new `.qmd` stubs to add actual content.
+4. Run `make website` (or `make all`) to preview the rendered output.
+5. Repeat.
+
+For big structural changes (renaming modules, changing artifact types), use
+`quarto-coursegen generate --force` to regenerate stubs with updated front matter.
+
+::: {.callout-warning}
+`--force` overwrites manual edits in stub files. Review the diff carefully
+before committing.
+:::

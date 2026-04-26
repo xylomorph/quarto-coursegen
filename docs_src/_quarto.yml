@@ -1,0 +1,67 @@
+project:
+  type: website
+  output-dir: ../docs
+
+website:
+  title: "quarto-coursegen"
+  description: "Scaffold Quarto course websites from a single course.yaml"
+
+  navbar:
+    background: primary
+    foreground: light
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Get Started"
+        href: installation.qmd
+    right:
+      - icon: github
+        href: https://github.com/xylomorph/quarto-coursegen
+        aria-label: GitHub
+
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - text: "Overview"
+        href: index.qmd
+      - section: "Getting Started"
+        contents:
+          - text: "Installation"
+            href: installation.qmd
+          - text: "Two-Stage Workflow"
+            href: workflow.qmd
+      - section: "Reference"
+        contents:
+          - text: "course.yaml"
+            href: course-yaml.qmd
+          - text: "Artifacts"
+            href: artifacts.qmd
+          - section: "Commands"
+            contents:
+              - text: "init"
+                href: commands/init.qmd
+              - text: "generate"
+                href: commands/generate.qmd
+          - text: "Configuration file"
+            href: configuration.qmd
+          - text: "Templates & Filters"
+            href: templates.qmd
+          - text: "Internationalisation"
+            href: i18n.qmd
+          - text: "Python API"
+            href: python-api.qmd
+      - section: "Guides"
+        contents:
+          - text: "Rendering"
+            href: rendering.qmd
+
+  page-footer:
+    center: "quarto-coursegen — MIT Licence"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-copy: true

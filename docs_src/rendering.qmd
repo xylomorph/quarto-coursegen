@@ -1,0 +1,139 @@
+---
+title: "Rendering"
+---
+
+Stage 2 of the workflow: turning completed `.qmd` files into HTML, PDF, and
+slide formats using [Quarto](https://quarto.org/).
+
+::: {.callout-note}
+`quarto-coursegen` does not invoke Quarto.
+Run `make <target>` or `quarto render …` yourself once the stubs are filled in.
+:::
+
+---
+
+## Sub-project architecture
+
+Each output type is an independent Quarto **sub-project** rooted in a
+subdirectory of `content/`.
+
+**Why sub-projects and not Quarto profiles?**
+Profiles *merge* onto the base `_quarto.yml` (a website project), which causes
+project-type and format bleed — slides are accidentally rendered as website
+pages, or website navigation leaks into PDF output.
+Independent sub-projects have their own `_quarto.yml` with an isolated
+project type and format config, which avoids all of these issues.
+
+| Sub-project | Directory | `_quarto.yml` | Formats |
+|-------------|-----------|---------------|---------|
+| Website | project root | `_quarto.yml` | `html` |
+| Slides | `content/slides/` | `content/slides/_quarto.yml` | `revealjs`, `beamer` |
+| Handouts | `content/handouts/` | `content/handouts/_quarto.yml` | `pdf` |
+| Assignments | `content/assignments/` | `content/assignments/_quarto.yml` | `html`, `pdf` |
+
+The three sub-project `_quarto.yml` files are **always regenerated** by
+`quarto-coursegen generate`.
+Do not edit them by hand — they will be overwritten on the next generate run.
+
+---
+
+## Makefile targets
+
+The `Makefile` created by `quarto-coursegen init` provides these targets:
+
+```bash
+make website      # quarto render (root project → docs/)
+make slides       # quarto render content/slides/
+make handouts     # quarto render content/handouts/
+make assignments  # quarto render content/assignments/
+make all          # website + slides + handouts + assignments
+make clean        # remove Quarto render caches
+make clean-all    # remove docs/ output as well
+```
+
+---
+
+## Quarto extensions
+
+The built-in templates reference the
+[fontawesome](https://github.com/quarto-ext/fontawesome) extension.
+Install it once in the course project root:
+
+```bash
+quarto add quarto-ext/fontawesome
+```
+
+---
+
+## Switching from Beamer to decktape for slide PDFs
+
+By default, PDF slides are produced via Quarto's Beamer format.
+As an alternative, [decktape](https://github.com/astefanutti/decktape) can
+generate PDFs directly from the rendered reveal.js HTML — often with better
+visual fidelity (faithful colours, custom fonts, animations).
+
+### Step 1 — Remove `beamer` from `course.yaml`
+
+```yaml
+# course.yaml
+artifacts:
+  - id: intro-slides
+    type: slides
+    output_formats: [revealjs]   # was: [revealjs, beamer]
+```
+
+Then regenerate to update the slides sub-project config and any new stubs:
+
+```bash
+quarto-coursegen generate
+```
+
+### Step 2 — Add a `slides-pdf` target to the `Makefile`
+
+```makefile
+slides:
+	quarto render content/slides/
+
+slides-pdf: slides
+	for f in docs/slides/*-slides.html; do \
+	    decktape reveal "$$f" "$${f%.html}.pdf"; \
+	done
+
+all: website slides slides-pdf handouts assignments
+```
+
+### Requirements
+
+- decktape must be installed and on `PATH`:
+  ```bash
+  npm install -g decktape
+  ```
+- decktape drives a headless Chromium instance.
+  In CI environments, a virtual framebuffer may be needed:
+  ```bash
+  xvfb-run make slides-pdf
+  ```
+
+---
+
+## Output directory layout
+
+After `make all` the rendered output is in `docs/`:
+
+```
+docs/
+├── index.html                ← course website home
+├── modules/
+│   └── *.html
+├── slides/
+│   ├── *-slides.html         ← reveal.js
+│   └── *-slides.pdf          ← Beamer (or decktape) PDFs
+├── handouts/
+│   └── *-handout.pdf
+└── assignments/
+    ├── *-assignment.html
+    └── *-assignment.pdf
+```
+
+This layout is compatible with GitHub Pages (serve from `docs/` on the
+`main` branch, or deploy via `gh-pages`).

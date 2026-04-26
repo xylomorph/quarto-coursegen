@@ -1,0 +1,56 @@
+---
+title: "quarto-coursegen"
+subtitle: "Scaffold Quarto course websites from a single `course.yaml`"
+---
+
+`quarto-coursegen` is a CLI tool that turns a single `course.yaml` definition
+into a complete set of [Quarto](https://quarto.org/) teaching materials —
+structured `.qmd` skeleton files, sub-project configs, and a course website.
+
+It owns the **generation stage** of a two-stage authoring workflow:
+
+| Stage | Tool | What it does |
+|-------|------|-------------|
+| **1 — Generation** | `quarto-coursegen generate` | Reads `course.yaml`, writes `.qmd` skeletons and Quarto config files |
+| **2 — Rendering** | `quarto render` / `make …` | Turns completed `.qmd` files into HTML, PDF, reveal.js, Beamer |
+
+::: {.callout-important}
+**Core principle: never mix the two stages.**
+Generation is structural and potentially destructive.
+Rendering is repeatable and safe.
+:::
+
+## Quick start
+
+```bash
+# Install
+pip install quarto-coursegen          # or: uv tool install quarto-coursegen
+
+# Bootstrap a new course project
+quarto-coursegen init my-course
+cd my-course
+
+# Edit course.yaml — title, modules, artifacts, instructors …
+
+# Scaffold .qmd stubs from course.yaml
+quarto-coursegen generate
+
+# Fill in content in the generated .qmd files, then render
+quarto render          # course website → docs/
+make slides            # reveal.js + Beamer PDF → docs/slides/
+make handouts          # PDF handouts → docs/handouts/
+```
+
+## What `quarto-coursegen` does *not* do
+
+- It does not invoke Quarto. `generate` only writes plain text files.
+- It does not manage Quarto extensions or themes.
+- It does not deploy or publish the rendered output.
+
+## Next steps
+
+- [Installation](installation.qmd) — requirements and install options
+- [Two-stage workflow](workflow.qmd) — understanding the architecture
+- [`course.yaml` reference](course-yaml.qmd) — the single source of truth
+- [`init` command](commands/init.qmd) — bootstrap a new course project
+- [`generate` command](commands/generate.qmd) — generate stubs from `course.yaml`

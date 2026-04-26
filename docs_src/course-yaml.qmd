@@ -1,0 +1,147 @@
+---
+title: "course.yaml Reference"
+---
+
+`course.yaml` is the **single source of truth** for the entire course.
+The generator reads nothing else to determine what files to create.
+
+## Top-level structure
+
+```yaml
+course:      # course-wide metadata
+  ...
+
+artifacts:   # course-level artifacts (e.g. syllabus, overview deck)
+  - ...
+
+modules:     # ordered list of modules
+  - ...
+```
+
+---
+
+## `course` block
+
+```yaml
+course:
+  id: my-course                  # used in file paths and URLs
+  title: "Logic 101"
+  subtitle: "Introduction to Formal Logic"
+  semester: "WS 2026"
+  language: "en"                 # drives i18n strings; built-ins: en, de
+  ects: 3
+  instructors:
+    - name: "Prof. Jane Smith"
+      email: "smith@example.com"
+      role: "lecturer"           # lecturer | tutor | coordinator
+  organization:
+    institution: "Example University"
+    department: "Department of Philosophy"
+  defaults:                      # applied to every module unless overridden
+    status: planned
+    visibility: public
+    duration: 90                 # minutes
+  schedule:
+    start_date: 2026-10-01
+    end_date:   2027-01-31
+    weekly_day: "Monday"
+  i18n:                          # optional inline i18n overrides (see Internationalisation)
+    nav:
+      home: Startseite
+```
+
+### Instructors
+
+Instructors are defined at course level and can be overridden per module.
+If a module omits its own `instructors:` list, the course-level list is
+inherited automatically by the generator.
+
+Each entry supports:
+
+| Field | Description |
+|-------|-------------|
+| `name` | Full name (required) |
+| `email` | Email address (optional) |
+| `role` | `lecturer`, `tutor`, or `coordinator` |
+
+### `defaults` block
+
+Any field in `defaults` is merged into every module entry that does not set
+that field explicitly.
+Common uses: `status`, `visibility`, `duration`.
+
+---
+
+## Module entries
+
+```yaml
+modules:
+  - id: intro                     # unique; used in file names and URLs
+    type: lecture                 # lecture | exercise | lab | seminar | …
+    title: "Introduction"
+    subtitle: "Why logic?"        # optional
+    description: |               # optional free-text
+      Overview of the course …
+    date: 2026-10-01
+    duration: 90                  # minutes; overrides defaults.duration
+    status: planned               # planned | draft | ready | published
+    visibility: public            # public | hidden
+    instructors:                  # overrides course-level instructors
+      - name: "Dr. Jones"
+        role: tutor
+    tags: [logic, intro]
+    learning_objectives: |
+      - Understand the scope of formal logic
+      - Distinguish syntax from semantics
+    lms:
+      release: 2026-09-28
+      due: 2026-10-08
+    dependencies: []
+    artifacts:
+      - id: intro-slides
+        type: slides
+        enabled: true
+        output_formats: [revealjs, beamer]
+      - id: intro-handout
+        type: handout
+        enabled: true
+        output_formats: [website, pdf]
+```
+
+### Module fields
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `id` | — | Required. Unique identifier; used in file names and URLs |
+| `type` | — | Module type (metadata only; `lecture`, `exercise`, …) |
+| `title` | — | Display title |
+| `subtitle` | — | Optional subtitle |
+| `description` | — | Optional free-text description |
+| `date` | — | ISO date of the session |
+| `duration` | `defaults.duration` | Duration in minutes |
+| `status` | `defaults.status` | `planned`, `draft`, `ready`, `published` |
+| `visibility` | `defaults.visibility` | `public` or `hidden` |
+| `instructors` | course-level list | List of instructor entries |
+| `tags` | — | List of tags (metadata only) |
+| `learning_objectives` | — | Multiline string or list |
+| `lms` | — | LMS release/due dates (metadata only) |
+| `dependencies` | `[]` | List of other module IDs this module depends on |
+| `artifacts` | — | List of artifact entries — see [Artifacts](artifacts.qmd) |
+
+---
+
+## Course-level `artifacts`
+
+Artifacts can also be declared at the top level for course-wide documents
+such as a syllabus or a course overview slide deck:
+
+```yaml
+artifacts:
+  - id: syllabus
+    type: syllabus
+    enabled: true
+    file: "content/syllabus.qmd"
+```
+
+These follow the same schema as module-level artifacts.
+See [Artifacts](artifacts.qmd) for all artifact fields and options.
