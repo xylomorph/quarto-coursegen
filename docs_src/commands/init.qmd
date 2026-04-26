@@ -20,8 +20,9 @@ Nothing is overwritten unless `--force` is given.
 |------|-------------|
 | `course.yaml` | Starter course definition — edit this first |
 | `Makefile` | Rendering targets (`make website`, `make slides`, …) |
-| `styles/custom.scss` | Website HTML theme stub |
-| `styles/slides.scss` | reveal.js theme stub |
+| `assets/styles/custom.scss` | Website HTML theme stub |
+| `assets/styles/slides.scss` | reveal.js theme stub |
+| `assets/` | Root for additional assets (images, partials, …) |
 | `.gitignore` | Ignores `docs/`, Quarto caches, `.venv/` |
 | `templates/*.j2` | All built-in Jinja2 templates — ready for local customisation |
 | `lang/*.yaml` | Built-in language files (`en.yaml`, `de.yaml`) — add or override strings |

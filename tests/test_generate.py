@@ -516,8 +516,8 @@ class TestInitProject:
     SKELETON_FILES = {
         "course.yaml",
         "Makefile",
-        "styles/custom.scss",
-        "styles/slides.scss",
+        "assets/styles/custom.scss",
+        "assets/styles/slides.scss",
         ".gitignore",
     }
 

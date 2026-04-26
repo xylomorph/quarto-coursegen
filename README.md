@@ -68,7 +68,8 @@ course-repo/
 │  ← quarto-coursegen init
 ├── course.yaml               ← edit this: title, modules, artifacts
 ├── Makefile                  ← rendering targets (make website / slides / …)
-├── styles/
+├── assets/
+│   └── styles/
 ├── templates/                ← built-in Jinja2 templates (customise locally)
 ├── lang/                     ← built-in language files (customise locally)
 │
