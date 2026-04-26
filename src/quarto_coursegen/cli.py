@@ -4,6 +4,7 @@ quarto_coursegen.cli — Typer CLI for quarto-coursegen.
 Entry point: quarto-coursegen (mapped to `app` in pyproject.toml)
 
 Commands:
+  init      — bootstrap a new course project from bundled skeleton files
   generate  — scaffold Quarto course stubs from course.yaml
 """
 from __future__ import annotations
@@ -39,6 +40,43 @@ def _root(
     ] = None,
 ) -> None:
     """quarto-coursegen — scaffold Quarto course websites from course.yaml."""
+
+
+@app.command()
+def init(
+    course_dir: Annotated[
+        Optional[Path],
+        typer.Argument(
+            help="Directory to initialise. Created if it does not exist. "
+                 "Defaults to the current directory.",
+        ),
+    ] = None,
+    force: Annotated[
+        bool,
+        typer.Option("--force", "-f", help="Overwrite existing files."),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Print what would be copied without writing files."),
+    ] = False,
+) -> None:
+    """Initialise a new Quarto course project.
+
+    Copies the bundled skeleton files (course.yaml, Makefile, styles/, .gitignore)
+    into the target directory. Existing files are not overwritten unless --force
+    is given.
+
+    \b
+    Examples:
+      quarto-coursegen init                  # initialise current directory
+      quarto-coursegen init my-course        # create and initialise my-course/
+      quarto-coursegen init my-course -f     # overwrite existing files
+      quarto-coursegen init --dry-run        # preview without writing
+    """
+    from quarto_coursegen.initializer import init_project
+
+    target = (Path.cwd() / course_dir).resolve() if course_dir else Path.cwd()
+    init_project(target, force=force, dry_run=dry_run)
 
 
 @app.command()

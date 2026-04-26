@@ -31,6 +31,7 @@ from quarto_coursegen.config import (
     load_i18n,
 )
 from quarto_coursegen.generators import generate
+from quarto_coursegen.initializer import SKELETON_DIR, init_project
 
 # ---------------------------------------------------------------------------
 # Shared fixture data
@@ -503,3 +504,107 @@ class TestGeneratorIntegration:
         generate(cfg)
         content = (tmp_path / "content" / "modules" / "intro.qmd").read_text()
         assert content == "CUSTOM_MODULE_TEMPLATE"
+
+
+# ---------------------------------------------------------------------------
+# Tests: init_project
+# ---------------------------------------------------------------------------
+
+class TestInitProject:
+    """Tests for quarto_coursegen.initializer.init_project."""
+
+    SKELETON_FILES = {
+        "course.yaml",
+        "Makefile",
+        "styles/custom.scss",
+        "styles/slides.scss",
+        ".gitignore",
+    }
+
+    def _relative_files(self, root: Path) -> set[str]:
+        return {
+            str(f.relative_to(root)).replace("\\", "/")
+            for f in root.rglob("*")
+            if f.is_file()
+        }
+
+    def _expected_files(self) -> set[str]:
+        tmpl = {
+            "templates/" + f.name
+            for f in BUILTIN_TEMPLATES_DIR.iterdir()
+            if f.is_file()
+        }
+        lang = {
+            "lang/" + f.name
+            for f in BUILTIN_LANG_DIR.iterdir()
+            if f.is_file()
+        }
+        return self.SKELETON_FILES | tmpl | lang
+
+    def test_copies_all_skeleton_files(self, tmp_path: Path) -> None:
+        init_project(tmp_path)
+        assert self._relative_files(tmp_path) == self._expected_files()
+
+    def test_templates_dir_populated(self, tmp_path: Path) -> None:
+        init_project(tmp_path)
+        tmpl_dir = tmp_path / "templates"
+        assert tmpl_dir.is_dir()
+        assert any(tmpl_dir.glob("*.j2"))
+
+    def test_lang_dir_populated(self, tmp_path: Path) -> None:
+        init_project(tmp_path)
+        lang_dir = tmp_path / "lang"
+        assert lang_dir.is_dir()
+        assert (lang_dir / "en.yaml").exists()
+        assert (lang_dir / "de.yaml").exists()
+
+    def test_creates_target_directory(self, tmp_path: Path) -> None:
+        target = tmp_path / "new-course"
+        assert not target.exists()
+        init_project(target)
+        assert target.is_dir()
+        assert (target / "course.yaml").exists()
+
+    def test_course_yaml_is_valid_yaml(self, tmp_path: Path) -> None:
+        init_project(tmp_path)
+        data = yaml.safe_load((tmp_path / "course.yaml").read_text())
+        assert "course" in data
+        assert "modules" in data
+
+    def test_makefile_has_rendering_targets(self, tmp_path: Path) -> None:
+        init_project(tmp_path)
+        makefile = (tmp_path / "Makefile").read_text()
+        for target in ("website", "slides", "handouts", "assignments", "all", "clean"):
+            assert f"{target}:" in makefile
+
+    def test_makefile_has_no_generate_target(self, tmp_path: Path) -> None:
+        """The Makefile should not contain a generate target — that's the CLI."""
+        init_project(tmp_path)
+        makefile = (tmp_path / "Makefile").read_text()
+        assert "generate:" not in makefile
+
+    def test_skip_existing_files_by_default(self, tmp_path: Path) -> None:
+        (tmp_path / "course.yaml").write_text("CUSTOM", encoding="utf-8")
+        init_project(tmp_path)
+        assert (tmp_path / "course.yaml").read_text() == "CUSTOM"
+
+    def test_force_overwrites_existing_files(self, tmp_path: Path) -> None:
+        (tmp_path / "course.yaml").write_text("CUSTOM", encoding="utf-8")
+        init_project(tmp_path, force=True)
+        content = (tmp_path / "course.yaml").read_text()
+        assert content != "CUSTOM"
+        assert "course:" in content
+
+    def test_dry_run_creates_no_files(self, tmp_path: Path) -> None:
+        target = tmp_path / "dry-course"
+        init_project(target, dry_run=True)
+        assert not target.exists()
+
+    def test_skeleton_dir_contains_expected_files(self) -> None:
+        """Sanity check: the bundled skeleton has the expected files."""
+        skeleton_files = {
+            str(f.relative_to(SKELETON_DIR)).replace("\\", "/")
+            for f in SKELETON_DIR.rglob("*")
+            if f.is_file()
+        }
+        assert self.SKELETON_FILES == skeleton_files

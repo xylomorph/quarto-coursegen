@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
+from importlib.resources import files as _pkg_files
 from pathlib import Path
 from typing import Optional
 
@@ -19,10 +20,12 @@ import yaml
 # ---------------------------------------------------------------------------
 # Built-in package data locations
 # ---------------------------------------------------------------------------
+# Use importlib.resources so paths are correct in any packaging format
+# (wheel, editable install, etc.) without hardcoding __file__.
 
-_PACKAGE_DIR = Path(__file__).parent
-BUILTIN_TEMPLATES_DIR = _PACKAGE_DIR / "templates"
-BUILTIN_LANG_DIR = _PACKAGE_DIR / "lang"
+_PKG_DATA = _pkg_files("quarto_coursegen").joinpath("package_data")
+BUILTIN_TEMPLATES_DIR: Path = Path(_PKG_DATA / "templates")
+BUILTIN_LANG_DIR: Path = Path(_PKG_DATA / "lang")
 
 # ---------------------------------------------------------------------------
 # Built-in English i18n defaults — base for all languages
