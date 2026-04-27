@@ -36,9 +36,10 @@ def generate_module_page(
     env: Environment,
     module: dict,
     config: CoursegenConfig,
+    course: dict | None = None,
 ) -> None:
     tmpl = env.get_template("module.qmd.j2")
-    content = tmpl.render(module=module)
+    content = tmpl.render(module=module, course=course or {})
     out = config.content_dir / "modules" / f"{module['id']}.qmd"
     write_file(
         out, content,
@@ -53,6 +54,7 @@ def generate_artifact_stubs(
     env: Environment,
     module: dict,
     config: CoursegenConfig,
+    course: dict | None = None,
 ) -> None:
     """Generate stub .qmd files for each enabled artifact in a module."""
     for artifact in (module.get("artifacts") or []):
@@ -69,7 +71,7 @@ def generate_artifact_stubs(
             )
             continue
 
-        rendered = tmpl.render(module=module, artifact=artifact)
+        rendered = tmpl.render(module=module, artifact=artifact, course=course or {})
         file_path = artifact.get("file") or default_artifact_path(artifact, module["id"])
         out = config.output_root / file_path
         write_file(
@@ -254,8 +256,8 @@ def generate(config: CoursegenConfig) -> None:
         console.print("[yellow](dry-run — no files will be written)[/yellow]\n")
 
     for module in modules:
-        generate_module_page(env, module, config)
-        generate_artifact_stubs(env, module, config)
+        generate_module_page(env, module, config, course=course)
+        generate_artifact_stubs(env, module, config, course=course)
 
     generate_course_artifacts(env, course, modules, course_artifacts, config)
     generate_index(env, course, modules, config)

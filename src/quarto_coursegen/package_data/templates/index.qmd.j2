@@ -1,7 +1,7 @@
 ---
 title: "{{ course.title }}"
 {% if course.subtitle is defined and course.subtitle %}subtitle: "{{ course.subtitle }}"
-{% endif %}
+{% endif %}lang: "{{ course.language | default('en') }}"
 format:
   html: default
   pdf:

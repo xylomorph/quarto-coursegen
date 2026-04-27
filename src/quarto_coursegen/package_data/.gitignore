@@ -5,6 +5,7 @@ docs/
 .quarto/
 *_cache/
 *_files/
+_extensions/
 
 # Python
 __pycache__/

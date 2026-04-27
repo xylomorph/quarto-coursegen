@@ -1,6 +1,7 @@
 ---
 title: "{{ i18n.syllabus.title }}"
 subtitle: "{{ course.title }}{% if course.subtitle is defined and course.subtitle %}: {{ course.subtitle }}{% endif %}"
+lang: "{{ course.language | default('en') }}"
 format:
   html: default
   pdf:

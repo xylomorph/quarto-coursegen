@@ -1,7 +1,8 @@
 ---
 title: "{{ module.title }}{% if module.subtitle is defined and module.subtitle %}: {{ module.subtitle }}{% endif %}"
 {% if module.date is defined %}date: "{{ module.date }}"
-{% endif %}format:
+{% endif %}lang: "{{ course.language | default('en') }}"
+format:
   revealjs:
     theme: [default, ../../assets/styles/slides.scss]
     slide-number: true

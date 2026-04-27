@@ -601,10 +601,11 @@ class TestInitProject:
         assert not target.exists()
 
     def test_skeleton_dir_contains_expected_files(self) -> None:
-        """Sanity check: the bundled skeleton has the expected files."""
+        """Sanity check: the bundled package_data has the expected skeleton files."""
+        _excluded = {"templates", "lang"}
         skeleton_files = {
             str(f.relative_to(SKELETON_DIR)).replace("\\", "/")
             for f in SKELETON_DIR.rglob("*")
-            if f.is_file()
+            if f.is_file() and f.relative_to(SKELETON_DIR).parts[0] not in _excluded
         }
         assert self.SKELETON_FILES == skeleton_files

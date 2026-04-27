@@ -3,7 +3,8 @@ title: "{{ module.title }}"
 {% if module.subtitle is defined and module.subtitle %}subtitle: "{{ module.subtitle }}"
 {% endif %}date: "{{ module.date }}"
 {% if module.status is defined %}status: "{{ module.status }}"
-{% endif %}---
+{% endif %}lang: "{{ course.language | default('en') }}"
+---
 
 ## {% raw %}{{< fa circle-info >}}{% endraw %} {{ i18n.module_page.overview }}
 

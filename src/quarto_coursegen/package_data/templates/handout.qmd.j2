@@ -1,7 +1,8 @@
 ---
 title: "{{ module.title }}{% if module.subtitle is defined and module.subtitle %}: {{ module.subtitle }}{% endif %}"
 {% if module.date is defined %}date: "{{ module.date }}"
-{% endif %}format:
+{% endif %}lang: "{{ course.language | default('en') }}"
+format:
 {% if 'website' in (artifact.output_formats | default([])) %}  html: default
 {% endif %}  pdf:
     documentclass: article

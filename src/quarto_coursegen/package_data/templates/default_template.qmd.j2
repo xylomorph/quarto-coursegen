@@ -3,7 +3,8 @@
 {% if module.date is defined %}date: "{{ module.date }}"
 {% endif %}{% elif course is defined %}title: "{{ course.title }}"
 {% else %}title: "{{ artifact.id | default('Untitled') }}"
-{% endif %}format: html
+{% endif %}lang: "{{ course.language | default('en') }}"
+format: html
 ---
 
 ## {{ i18n.module_page.overview }}

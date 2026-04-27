@@ -17,10 +17,10 @@ from quarto_coursegen.config import BUILTIN_LANG_DIR, BUILTIN_TEMPLATES_DIR
 
 console = Console()
 
-# Skeleton directory shipped with the package — accessed via importlib.resources
-# so it works correctly across all packaging formats (wheel, editable, etc.).
+# Package data directory — accessed via importlib.resources so it works correctly
+# across all packaging formats (wheel, editable, etc.).
 _PKG_DATA: Traversable = _pkg_files("quarto_coursegen").joinpath("package_data")
-SKELETON_DIR: Path = Path(_PKG_DATA / "skeleton")
+SKELETON_DIR: Path = Path(_PKG_DATA)
 
 
 def _write_file(
@@ -56,14 +56,19 @@ def _copy_traversable_tree(
     force: bool,
     dry_run: bool,
     root: Path,
+    exclude: frozenset[str] = frozenset(),
 ) -> None:
     """Recursively copy a ``Traversable`` resource tree into *dst_dir*.
 
     Using the ``Traversable`` API (``iterdir`` / ``read_bytes``) instead of
     ``Path.__file__`` means this works correctly from any packaging format —
     a regular wheel install, an editable install, or a zip-based import.
+
+    Top-level children whose names are in *exclude* are skipped entirely.
     """
     for child in sorted(src.iterdir(), key=lambda c: c.name):
+        if child.name in exclude:
+            continue
         dst = dst_dir / child.name
         if child.is_dir():
             _copy_traversable_tree(child, dst, force=force, dry_run=dry_run, root=root)
@@ -82,8 +87,8 @@ def init_project(
     Copies the following bundled files into *target*:
       - course.yaml            (starter course definition — edit this)
       - Makefile               (rendering targets only)
-      - styles/custom.scss     (website SCSS theme stub)
-      - styles/slides.scss     (reveal.js SCSS theme stub)
+      - assets/styles/custom.scss  (website SCSS theme stub)
+      - assets/styles/slides.scss  (reveal.js SCSS theme stub)
       - .gitignore
       - templates/*.j2         (all built-in Jinja2 templates — customise freely)
       - lang/*.yaml            (built-in i18n files — customise or extend)
@@ -98,7 +103,11 @@ def init_project(
     if dry_run:
         console.print("[yellow](dry-run — no files will be written)[/yellow]\n")
 
-    _copy_traversable_tree(_PKG_DATA / "skeleton", target, force=force, dry_run=dry_run, root=target)
+    _copy_traversable_tree(
+        _PKG_DATA, target,
+        force=force, dry_run=dry_run, root=target,
+        exclude=frozenset({"templates", "lang"}),
+    )
     _copy_traversable_tree(_PKG_DATA / "templates", target / "templates", force=force, dry_run=dry_run, root=target)
     _copy_traversable_tree(_PKG_DATA / "lang", target / "lang", force=force, dry_run=dry_run, root=target)
 
